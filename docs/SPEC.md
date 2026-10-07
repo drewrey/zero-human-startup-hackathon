@@ -62,11 +62,41 @@ Voice-first. Photo is optional (and later powers listing drafts).
 - **BR-1 Expected sale price** for a platform = median sold price of matched comps on that platform
   in the last 90 days, after outlier removal (BR-12).
 - **BR-2 Net profit** for a platform =
-  `expected_sale_price − platform_fees(expected_sale_price) − seller_shipping_cost − purchase_cost`,
-  where `purchase_cost = tag_price × (1 + sales_tax_rate)`.
-- **BR-3 Platform fees and seller shipping costs** live in a config table (platform, fee formula,
-  shipping assumption for apparel, source URL, as-of date). They are never hardcoded inside
-  business logic. Values: **TBD (Research)**.
+  `expected_sale_price + seller_received_shipping − platform_fees(fee_inputs, fee_rule) − seller_shipping_cost − purchase_cost`,
+  where `purchase_cost = tag_price × (1 + sales_tax_rate)`. The fee inputs are the expected item
+  price, buyer shipping charge (even when a platform collects it for a label), applicable buyer sales
+  tax, and any other charge included by that platform's rule. Buyer sales tax is a fee-base input,
+  **not** seller revenue. `seller_received_shipping` is only a shipping payment that actually reaches
+  the seller; it is zero for a platform-managed buyer-paid label. `seller_shipping_cost` is actual
+  postage/label cost or seller-funded shipping discount/upgrade, not the buyer's shipping charge.
+  Count a buyer-paid shipping amount in revenue only when the seller receives it, and count its
+  actual postage cost separately. For a buyer-pays-label baseline, seller shipping cost is zero,
+  but any buyer shipping charge still enters a fee base when the platform requires it.
+  If a required fee-base or shipping input is unavailable, use an explicit item-price-only scenario,
+  display **ESTIMATE: item-only fee base, buyer-paid shipping, no seller discount** on the result,
+  retain the missing-input assumption in the result object, and do not output BUY from that
+  incomplete profit estimate. This temporary scenario is not a substitute for collecting the inputs.
+  Each platform result MUST include `fee_estimate` with typed `status` (`"complete"` or
+  `"estimate"`), `fee_base_mode` (`"full"` or `"item_only"`), `missing_inputs` (an array of
+  required fee/shipping input identifiers), and `assumptions` (user-readable scenario text).
+  `status = "complete"` only when every input required by the selected effective-dated fee
+  rule is known, including an explicit zero or not-applicable value; a missing value is never
+  treated as zero. Otherwise set `status = "estimate"`, `fee_base_mode = "item_only"`, and
+  name every missing input and the scenario on the card. `complete` describes input coverage,
+  not guaranteed realized proceeds. Keep these fee assumptions separate from item-attribute
+  `assumptions`. The recommended platform's `fee_estimate.status` governs whether a BUY claim
+  is allowed; a complete estimate on another platform does not clear an incomplete one.
+- **BR-3 Platform fees and seller shipping costs** live in a versioned config table with platform,
+  effective date, fee formula and its base (item price, buyer shipping, applicable buyer tax and
+  other applicable amounts), fixed-fee thresholds/exceptions, shipping mode, seller-funded
+  discount/label assumption, source URL and as-of date. They are never hardcoded in verdict logic.
+  Use the rate effective on the scan date, not a future published schedule. For an ordinary US
+  apparel order, the buyer-pays-shipping baseline has zero seller-paid postage, **not** zero postage
+  in the order or necessarily zero shipping in the fee base. The current verified branches and
+  exceptions are in [US apparel marketplace fees](research/fees.md) (checked 2026-10-07):
+  [eBay fee base](https://www.ebay.com/help/selling/fees-credits-invoices/selling-fees?id=4822),
+  [Depop processing base](https://depophelp.zendesk.com/hc/en-gb/articles/360001791127-Seller-fees-and-charges),
+  [Mercari fee base](https://www.mercari.com/us/help_center/article/169/).
 
 ### Verdict
 
@@ -75,8 +105,11 @@ Voice-first. Photo is optional (and later powers listing drafts).
   - **NOT ENOUGH DATA:** fewer than 3 matched sold comps across all platforms; check this first.
   - **PASS:** `net_profit ≤ 0`; or net profit is positive but below `min_profit` AND known
     sell-through fails the speed threshold in BR-10.
-  - **BUY:** `net_profit ≥ min_profit` AND a known sell-through rate meets the BR-10 speed threshold.
-  - **MAYBE:** remaining positive-profit cases (one threshold fails, or speed is unknown).
+  - **BUY:** `net_profit ≥ min_profit` AND a known sell-through rate meets the BR-10 speed threshold
+    AND the recommended platform has `fee_estimate.status = "complete"` (BR-2). An incomplete
+    fee estimate cannot produce BUY, regardless of the estimated profit or speed signal.
+  - **MAYBE:** remaining positive-profit cases (one threshold fails, speed is unknown, or the
+    recommended platform's fee estimate is incomplete).
     Unknown speed cannot produce BUY or PASS solely for being unknown.
   - `min_profit` and `max_days` are per-user settings. Defaults: `min_profit = $10`,
     `max_days = 30` (to be checked with users). `max_days` is a desired sale window for a
@@ -88,8 +121,10 @@ Voice-first. Photo is optional (and later powers listing drafts).
   BUY/PASS: the highest whole-dollar tag price at which net profit still clears `min_profit` (and stays
   > $0). Spoken as "Worth it under $X." If known sell-through misses the BR-10 speed threshold,
   the verdict is MAYBE with the max price ("Slower market. Worth it under $X."). If speed is
-  unknown, say so and use MAYBE with the max price; never imply an individual sale time. If no
-  tag price would clear `min_profit`, the verdict is PASS ("Even free, only about $N profit").
+  unknown, say so and use MAYBE with the max price; never imply an individual sale time.
+  An incomplete fee estimate on the recommended platform also produces MAYBE with an estimated
+  max price and its assumptions, never BUY_UNDER (BR-2). If no tag price would clear
+  `min_profit`, the verdict is PASS ("Even free, only about $N profit").
 - **BR-13 Low confidence:** with 3–5 matched comps, the verdict shows a "low confidence" label and the
   spoken answer says so.
 
@@ -181,15 +216,18 @@ If only one platform is live, BR-8 still runs; it simply has one candidate.
   "assumptions": ["condition: good"],
   "platforms": [
     { "platform": "ebay", "comps_used": 24, "median": 45, "p25": 38, "p75": 52,
-      "fees": 6.0, "shipping": 0, "net_profit": 32.0,
+      "fees": 6.0, "shipping": 0, "net_profit": 30.0,
+      "fee_estimate": { "status": "estimate", "fee_base_mode": "item_only",
+                        "missing_inputs": ["buyer_shipping", "buyer_sales_tax"],
+                        "assumptions": ["Buyer-paid shipping; no seller-funded discount; fees use item price only."] },
       "speed": { "sold_last_30d": 18, "active_listings": 12, "sell_through": 1.5,
                  "signal": "meets_target", "as_of": "2026-10-07" } }
   ],
   "recommended_platform": "ebay",
-  "verdict": "BUY",
+  "verdict": "MAYBE",
   "confidence": "normal",
   "max_buy_price": null,
-  "spoken": "Buy it. Best on eBay, about 32 profit. Recent demand meets your pace."
+  "spoken": "Maybe. eBay, about $30 estimated profit. Recent demand meets your pace. Buyer shipping and tax unknown."
 }
 ```
 
@@ -209,4 +247,17 @@ If only one platform is live, BR-8 still runs; it simply has one candidate.
   no card, speech or result object implies a specific number of days to sell (BR-10, BR-14).
 - Spoken numbers equal card numbers (BR-14, BR-15).
 - Home platform is recommended when it is within the bias threshold of the best platform (BR-8).
-- Fee values come from config with a source and as-of date (BR-3).
+- Fee values come from effective-dated config with a source and as-of date; a future rate is not used early (BR-3).
+- A buyer-paid shipping charge enters the eBay, Depop, and Mercari fee bases when their configured
+  rules require it, even when seller-paid postage is $0; buyer sales tax enters the eBay and Depop
+  bases when applicable and never becomes seller revenue (BR-2, BR-3).
+- A seller-funded shipping discount/label reduces profit; seller-collected shipping is added to
+  revenue exactly once and actual seller-paid postage is deducted exactly once (BR-2).
+- Each platform result has a typed `fee_estimate`; missing required inputs produce
+  `status = "estimate"`, `fee_base_mode = "item_only"`, explicit `missing_inputs` and fee
+  `assumptions`, distinct from item-attribute assumptions. The card shows the ESTIMATE label
+  and scenario for the recommended platform; complete input coverage requires explicit
+  zero/not-applicable values, not a silent default (BR-2, BR-3, BR-15).
+- An incomplete fee estimate on the recommended platform cannot produce BUY even when
+  speed and the estimated profit clear their thresholds; a complete result on another
+  platform does not lift this gate (BR-2, BR-4, BR-5).

@@ -32,7 +32,18 @@ export const FEES: Record<Platform, FeeRule> = {
     verified: false,
   },
   depop: { percent: 0.033, fixed: 0.45, sellerShipping: 0, source: null, asOf: null, verified: false },
-  mercari: { percent: 0.1, fixed: 0.5, sellerShipping: 0, source: null, asOf: null, verified: false },
+  // Verified 2026-10-07: 10% seller fee, no separate fixed/processing charge (fee schedule effective
+  // 2025-01-06). Base is item price + buyer-paid shipping; the engine currently passes item price only,
+  // so results are an item-only ESTIMATE (see PR #4 for the fee-base contract). The Oct 19, 2026 rate
+  // table is future and must not be used for the Oct 7 demo.
+  mercari: {
+    percent: 0.1,
+    fixed: 0,
+    sellerShipping: 0,
+    source: "https://www.mercari.com/us/help_center/article/169/",
+    asOf: "2026-10-07",
+    verified: true,
+  },
 };
 
 export function platformFee(rule: FeeRule, price: number): number {

@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import rows from "./fixtures/ebay-sold.json";
+import { sellSpeed } from "../pricing/engine";
+import { DEFAULT_SETTINGS } from "../config";
 import { ebayQuery, toPlatformListings } from "./ebay";
 
 describe("eBay comps mapping", () => {
@@ -17,6 +19,14 @@ describe("eBay comps mapping", () => {
   it("uses the summary row for BR-10 sell-speed inputs", () => {
     expect(listings.activeListings).toBe(3048);
     expect(listings.soldLast30d).toBe(687);
+  });
+
+  it("BR-10: keyword-level, capped, 90-day-averaged summary yields Speed unknown, never a rate", () => {
+    expect(listings.coverageComplete).toBe(false);
+    const s = sellSpeed(listings, DEFAULT_SETTINGS);
+    expect(s.signal).toBe("unknown");
+    expect(s.sellThrough).toBeNull();
+    expect(s.soldLast30d).toBeNull();
   });
 
   it("builds a search query from brand, model, gender, and size", () => {

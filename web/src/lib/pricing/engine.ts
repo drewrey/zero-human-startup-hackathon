@@ -1,6 +1,8 @@
 import {
   COMP_WINDOW_DAYS,
   FEES,
+  FEE_BASE_ASSUMPTIONS,
+  SPEED_GATES_VERDICT_FROM,
   HOME_PLATFORM_BIAS,
   LOW_CONFIDENCE_MAX_COMPS,
   MIN_COMPS,
@@ -147,7 +149,9 @@ export function evaluatePlatform(
   const prices = comps.map((c) => c.price);
   const expected = median(prices);
   const rule = FEES[listings.platform];
-  const fees = platformFee(rule, expected);
+  // Fees are charged on item price + assumed buyer shipping + assumed tax (conservative ESTIMATE).
+  const feeBase = expected + FEE_BASE_ASSUMPTIONS.buyerShipping + expected * FEE_BASE_ASSUMPTIONS.salesTaxRate;
+  const fees = platformFee(rule, feeBase);
   const shipping = rule.sellerShipping;
   const netProfit = expected - fees - shipping - purchaseCost(item.tagPrice, settings);
 
@@ -181,9 +185,16 @@ export function recommendPlatform(results: PlatformResult[], settings: Settings)
 }
 
 /** BR-5 and BR-4 with a known tag price. Unknown speed never yields BUY or PASS by itself. */
-export function decideVerdict(netProfit: number, signal: SpeedSignal, settings: Settings): Verdict {
+export function decideVerdict(
+  netProfit: number,
+  signal: SpeedSignal,
+  settings: Settings,
+  speedGates = true,
+): Verdict {
   if (netProfit <= 0) return "PASS";
   const profitOk = netProfit >= settings.minProfit;
+  // Phase 1: speed is information only.
+  if (!speedGates) return profitOk ? "BUY" : "MAYBE";
   if (profitOk && signal === "meets_target") return "BUY";
   if (!profitOk && signal === "below_target") return "PASS";
   return "MAYBE";
@@ -243,6 +254,12 @@ export function priceCheck(input: PriceCheckInput): PriceCheckResult {
   const label = PLATFORM_LABELS[rec.platform];
   const net = Math.round(rec.netProfit);
   const signal = rec.speed.signal;
+  const speedGates = now.getTime() >= Date.parse(SPEED_GATES_VERDICT_FROM);
+  const fb = FEE_BASE_ASSUMPTIONS;
+  base.assumptions = [
+    ...base.assumptions,
+    `ESTIMATE: fees assume $${fb.buyerShipping} buyer shipping and ${Math.round(fb.salesTaxRate * 100)}% sales tax (assumptions)`,
+  ];
   const speedText = SPEED_SIGNAL_TEXT[signal];
 
   if (item.tagPrice == null) {
@@ -253,23 +270,23 @@ export function priceCheck(input: PriceCheckInput): PriceCheckResult {
       verdict = "PASS";
       reason = `Even free, only about $${net} profit on ${label}.`;
     } else {
-      verdict = signal === "meets_target" ? "BUY_UNDER" : "MAYBE";
+      verdict = !speedGates || signal === "meets_target" ? "BUY_UNDER" : "MAYBE";
       reason =
-        signal === "below_target"
+        speedGates && signal === "below_target"
           ? `Slower market. Worth it under $${max} on ${label}.`
           : `Worth it under $${max} on ${label}. ${speedText}.`;
     }
     return finish({ ...base, recommendedPlatform: rec.platform, verdict, confidence, maxBuyPrice: max, reason });
   }
 
-  const verdict = decideVerdict(rec.netProfit, signal, settings);
+  const verdict = decideVerdict(rec.netProfit, signal, settings, speedGates);
   let reason: string;
   if (rec.netProfit <= 0) {
     reason = `You'd lose about $${Math.abs(net)} on ${label}.`;
   } else if (verdict === "BUY") {
-    reason = `Best on ${label}, about $${net} profit. ${speedText}.`;
+    reason = `Best on ${label}, about $${net} profit (estimate). ${speedText}.`;
   } else {
-    reason = `About $${net} profit on ${label}. ${speedText}.`;
+    reason = `About $${net} profit (estimate) on ${label}. ${speedText}.`;
   }
   return finish({ ...base, recommendedPlatform: rec.platform, verdict, confidence, maxBuyPrice: null, reason });
 }

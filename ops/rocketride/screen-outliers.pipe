@@ -1,0 +1,20 @@
+{
+  "name": "Flipwise: screen comp prices for outliers (BR-12)",
+  "project_id": "flipwise-screen-outliers",
+  "source": "source_1",
+  "components": [
+    { "id": "source_1", "provider": "webhook", "config": {} },
+    {
+      "id": "outliers_1",
+      "provider": "anomaly_detector",
+      "config": { "profile": "iqr" },
+      "input": [{ "lane": "text", "from": "source_1" }]
+    },
+    {
+      "id": "target_1",
+      "provider": "response",
+      "config": {},
+      "input": [{ "lane": "text", "from": "outliers_1" }]
+    }
+  ]
+}

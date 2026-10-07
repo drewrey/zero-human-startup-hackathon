@@ -60,16 +60,43 @@ const NUMBER_WORDS: Record<string, number> = {
   one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10,
   eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16, seventeen: 17,
   eighteen: 18, nineteen: 19, twenty: 20, thirty: 30, forty: 40, fifty: 50,
+  sixty: 60, seventy: 70, eighty: 80, ninety: 90,
 };
+
+const TENS = new Set(["twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"]);
+
+/** Parse a spoken amount of 1-199 ("ninety-nine", "a hundred", "one twenty"); null if not one. */
+function parseSpokenNumber(words: string[]): number | null {
+  let w = words;
+  let base = 0;
+  if ((w[0] === "a" || w[0] === "one") && w[1] === "hundred") {
+    base = 100;
+    w = w.slice(2);
+    if (w[0] === "and") w = w.slice(1);
+    if (w.length === 0) return 100;
+  } else if (w[0] === "one" && w.length >= 2 && TENS.has(w[1])) {
+    base = 100; // "one twenty" = 120
+    w = w.slice(1);
+  }
+  let v = 0;
+  if (w.length === 1 && w[0] in NUMBER_WORDS) v = NUMBER_WORDS[w[0]];
+  else if (w.length === 2 && TENS.has(w[0]) && w[1] in NUMBER_WORDS && NUMBER_WORDS[w[1]] < 10) {
+    v = NUMBER_WORDS[w[0]] + NUMBER_WORDS[w[1]];
+  } else return null;
+  const total = base + v;
+  return total >= 1 && total <= 199 ? total : null;
+}
 
 function parsePrice(text: string): number | null {
   const digits = text.match(/\$\s?(\d+(?:\.\d{1,2})?)|(\d+(?:\.\d{1,2})?)\s*(?:bucks|dollars)/i);
   if (digits) return Number(digits[1] ?? digits[2]);
-  const n = Object.keys(NUMBER_WORDS).join("|");
-  const words = text.match(new RegExp(`\\b(?:(twenty|thirty|forty|fifty)[\\s-])?(${n})\\s+(?:bucks|dollars)\\b`, "i"));
-  if (words) {
-    const tens = words[1] ? NUMBER_WORDS[words[1].toLowerCase()] : 0;
-    return tens + NUMBER_WORDS[words[2].toLowerCase()];
+  const m = text.toLowerCase().match(/((?:[a-z]+[\s-]+){0,4}[a-z]+)[\s-]+(?:bucks|dollars)\b/);
+  if (m) {
+    const toks = m[1].split(/[\s-]+/);
+    for (let i = 0; i < toks.length; i++) {
+      const n = parseSpokenNumber(toks.slice(i));
+      if (n !== null) return n;
+    }
   }
   return null;
 }

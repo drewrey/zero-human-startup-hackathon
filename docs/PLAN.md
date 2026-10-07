@@ -92,7 +92,7 @@ visible work in the company, not a token integration.
 | **Kylon** | $100 | The office: Atlas, Scout, Spec, and Comp live here as workspace members with roles, memory, rooms, the Agent Log and Decisions tables. Also the model proxy for the app's Claude calls | Agent profiles, room threads, Agent Log and Decisions tables |
 | **BAND** | Free account (live Oct 7) | The wire between agents that run in *different* tools: Kylon agents, Forge running in AdaL on the founder's computer, and the Rocket Ride pipeline. All cross-tool handoffs (spec → build, build → spec check, data issues → pipeline) go through one BAND room with @mentions | BAND room transcript of handoffs and delegations |
 | **AdaL** | (no credit info) | Forge's workbench: Forge runs as an AdaL agent that writes, tests, and ships the app; its browser agent does end-to-end checks on the live site | Commits and PRs authored through AdaL, browser test runs |
-| **Rocket Ride** | Cloud code | Comp's machinery: the price-check pipeline (query → Apify → match/filter → stats → index write) and the scheduled batch jobs (index refresh, growth, pre-warm) | Pipeline definitions in the repo, run history |
+| **Rocket Ride** | Cloud code (first job live Oct 7: `ops/rocketride/`) | Comp's machinery: the price-check pipeline (query → Apify → match/filter → stats → index write) and the scheduled batch jobs (index refresh, growth, pre-warm) | Pipeline definitions in the repo, run history |
 | **Prelint** | $250 (this repo) | Spec's enforcer: checks every PR against `docs/SPEC.md` business rules (`BR-n`) and blocks spec drift | PR checks citing BR rules |
 
 ### Other tools

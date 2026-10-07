@@ -14,7 +14,7 @@ The founder only:
 
 1. Signs up at app.kylon.io and creates the workspace.
 2. Installs the CLI and signs in: `curl -fsSL https://api.kylon.io/install.sh | sh` (opens a browser).
-3. Approves the Forge connection (Claude Code on this computer) when prompted.
+3. Installs AdaL on this computer, where Forge runs (see step 5).
 4. Generates one agent API key (agent settings → API key) for the app's Kylon model proxy and puts
    it in `web/.env.local` and the InstaCloud secrets as `ANTHROPIC_API_KEY`.
 5. Creates the other mandatory accounts: **BAND** (free signup at band.ai), **AdaL**

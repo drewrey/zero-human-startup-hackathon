@@ -33,6 +33,16 @@ npm run band:relay     # keep running while the team works (polls every 10s)
 
 It uses the founder's Kylon CLI session, so it runs on the founder's computer for now.
 
+## Forge (AdaL) worker
+
+```bash
+npm run forge              # pull Forge's BAND requests and have AdaL handle them end to end
+npm run forge -- --dry-run # show the prompt without running AdaL
+```
+`ops/forge/run.mjs` runs AdaL headless in a separate worktree (`../<repo>-forge`) on a fresh
+`origin/main`, with Forge's role prompt; AdaL branches, opens a PR, works the Prelint review, merges,
+and replies over BAND. Logs go to `ops/forge/logs/`.
+
 ## For Forge (AdaL) and other local agents
 
 ```bash

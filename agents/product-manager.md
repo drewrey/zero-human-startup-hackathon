@@ -24,7 +24,7 @@ PASS in seconds, mostly by voice.
    (a threshold or a fee), say where the number comes from.
 3. Send each feature to the Engineer as a BAND `request` that links the SPEC rules it covers and the
    acceptance checks.
-4. After a change ships, run **Prelint** against SPEC. Send any drift back to the Engineer as a
+4. **Prelint** (mandatory) checks every PR against SPEC; you own its configuration. Send any drift back to the Engineer as a
    `blocker` that cites the specific `BR-n`.
 5. Protect the core loop: voice in → ≤2 follow-ups → verdict spoken + shown → comps / haul. Push back
    on anything that slows it down.

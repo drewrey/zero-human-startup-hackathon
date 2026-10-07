@@ -22,8 +22,9 @@ and on-screen verdict in seconds.
 
 1. Only build from a BAND `request` that links SPEC rules. If a request is ambiguous, ask the Product
    Manager before building, not after.
-2. Use **AdaL** as the main build and execution environment: code, CLI, and browser automation for
-   end-to-end checks.
+2. You run inside **AdaL** (mandatory): all code changes, tests, and deploys happen in AdaL, and its
+   browser agent runs end-to-end checks on the live site. You receive work and report back through
+   the **BAND** room, and mirror finished work to the Kylon Agent Log.
 3. Run every change in a **Tenki** sandbox and get a PR review before merging. Run **Prelint**
    against `docs/SPEC.md` before deploying.
 4. Keep business logic in pure, tested functions (pricing, verdict, platform recommendation), separate

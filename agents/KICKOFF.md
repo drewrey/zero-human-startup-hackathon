@@ -4,8 +4,8 @@ Kylon is a shared workspace (rooms, threads, tables, workflows) where each agent
 own name, memory, and connections. The founder sets it up once; after that the agents coordinate in
 rooms and threads, and the CEO agent drives the work.
 
-BAND has no credits, so **Kylon threads are the handoff channel**. Every handoff uses the format in
-`_shared-context.md`.
+Kylon is the office; **BAND is the wire** between agents in different tools (Kylon agents, Forge in
+AdaL, the Rocket Ride pipeline). Every cross-tool handoff uses the format in `_shared-context.md`.
 
 ## 0. What the founder does vs. what's scripted
 
@@ -17,6 +17,12 @@ The founder only:
 3. Approves the Forge connection (Claude Code on this computer) when prompted.
 4. Generates one agent API key (agent settings → API key) for the app's Kylon model proxy and puts
    it in `web/.env.local` and the InstaCloud secrets as `ANTHROPIC_API_KEY`.
+5. Creates the other mandatory accounts: **BAND** (free signup at band.ai), **AdaL**
+   (`curl -fsSL https://adal.sylph.ai/install.sh | bash`), **Rocket Ride** cloud (hackathon code), and
+   **Prelint** on the GitHub repo.
+
+Then: one BAND room joins Forge (AdaL), the Kylon agents, and the Rocket Ride pipeline. Exactly how
+each connects (MCP, SDK adapter, or Band Desktop) is confirmed once the accounts exist.
 
 Everything below (agents, role prompts as skills, rooms, tables, kickoff message) is then created
 with `kylon workspace ...` commands.
@@ -50,13 +56,12 @@ A new agent starts private; add it to its rooms after creating it. For each one,
 | Scout (Research) | `market-research.md` | Kylon-hosted | Web research only | Querit (as a custom API service secret) |
 | Spec (PM) | `product-manager.md` | Kylon-hosted | Reads and edits the spec | GitHub (this repo) |
 | Comp (Pricing Data) | `pricing-data.md` | Kylon-hosted | Data quality and index decisions | GitHub, Apify |
-| Forge (Engineer) | `engineer.md` | **Bring your own: Claude Code** on the founder's computer | Needs the repo checkout, tests, and deploy CLI | Runs locally with the repo |
+| Forge (Engineer) | `engineer.md` | **AdaL** on the founder's computer, joined to the team through BAND (and to Kylon if AdaL can connect there) | AdaL is mandatory; needs the repo checkout, tests, and deploy CLI | Runs locally with the repo |
 
 Notes:
 - Kylon-hosted agents spend **Kylon credits** ($100). Start them on the Standard tier and watch usage
   for the first hour before moving anyone to Max.
-- Forge runs through the Kylon CLI gateway on this computer, so it uses your Claude Code login, not
-  Kylon credits, and it is offline when the computer sleeps.
+- Forge runs in AdaL on this computer, so it is offline when the computer sleeps.
 - Never paste API keys into chat. Add them as connections or secrets in Kylon.
 
 ## 3. Kickoff message (founder posts in `#hq`)

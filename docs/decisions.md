@@ -6,6 +6,7 @@
 | 2026-10-07 | Start with apparel, side-hustle resellers | Household, both, niche | Largest segment, rich comps, easy to say brand/model aloud | Founder |
 | 2026-10-07 | Cross-platform recommendation with home-platform bias | Home only, eBay only | Cross-marketplace view is our edge; bias respects where the user already sells | Founder |
 | 2026-10-07 | Host on InstaCloud (app container, Postgres, storage) | InstaCloud vs. InsForge Sites vs. other hosts | Sponsor credit; InstaCloud (from the InsForge team) runs our Next.js app as a container and gives us Postgres + storage for the price index | Founder |
+| 2026-10-07 | Kylon, BAND, AdaL, Rocket Ride, Prelint are mandatory and each gets a real job (see PLAN §6) | Optional use with fallbacks | Hackathon requirement | Founder |
 | 2026-10-07 | Next.js mobile web app, mobile-first | Native app | Fastest to ship and demo on any phone | Founder |
 
 ## Open decisions

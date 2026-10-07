@@ -78,23 +78,30 @@ and `Pricing Data agent runs the comp pipeline the product calls`.
 
 ## 6. Sponsor tools and credits
 
-Credits confirmed Oct 7. Tools without credits stay in the plan only if they turn out to have a free
-tier; until then each has a fallback.
+**Mandatory (hackathon requirement): Kylon, BAND, AdaL, Rocket Ride, Prelint.** Each must do real,
+visible work in the company, not a token integration.
+
+### Mandatory tools: what each one does here
+
+| Tool | Credits | Its job in the company | How it shows up for judges |
+|---|---|---|---|
+| **Kylon** | $100 | The office: Atlas, Scout, Spec, and Comp live here as workspace members with roles, memory, rooms, the Agent Log and Decisions tables. Also the model proxy for the app's Claude calls | Agent profiles, room threads, Agent Log and Decisions tables |
+| **BAND** | Free account | The wire between agents that run in *different* tools: Kylon agents, Forge running in AdaL on the founder's computer, and the Rocket Ride pipeline. All cross-tool handoffs (spec → build, build → spec check, data issues → pipeline) go through one BAND room with @mentions | BAND room transcript of handoffs and delegations |
+| **AdaL** | (no credit info) | Forge's workbench: Forge runs as an AdaL agent that writes, tests, and ships the app; its browser agent does end-to-end checks on the live site | Commits and PRs authored through AdaL, browser test runs |
+| **Rocket Ride** | Cloud code | Comp's machinery: the price-check pipeline (query → Apify → match/filter → stats → index write) and the scheduled batch jobs (index refresh, growth, pre-warm) | Pipeline definitions in the repo, run history |
+| **Prelint** | $250 (this repo) | Spec's enforcer: checks every PR against `docs/SPEC.md` business rules (`BR-n`) and blocks spec drift | PR checks citing BR rules |
+
+### Other tools
 
 | Tool | Credits | Use | Owner | Phase |
 |---|---|---|---|---|
-| Kylon | $100 | Hosts the 5 agents, roles, task ownership; agent handoffs until BAND is available | CEO | 1 |
-| InstaCloud (from the InsForge team) | Free tier | Hosts the app as a container (GitHub deploy, root dir `web`), plus Postgres and storage for scans and the price index. Services scale to zero when idle | Engineer | 1 |
-| Apify | $100 | Sold and active listings for comps, and nightly index refreshes | Pricing Data | 1 |
-| Prelint | $250 (this repo) | Check code against `docs/SPEC.md` before each deploy | PM | 1 |
-| Rocket Ride | Cloud code | Price-check pipeline, nightly batch jobs, feedback pipeline | Pricing Data | 1–2 |
+| InstaCloud (from the InsForge team) | Free tier | Hosts the app as a container (GitHub deploy, root dir `web`), plus Postgres for scans and the price index. Services scale to zero when idle | Engineer | 1 |
+| Apify | $100 | Sold and active listings for comps (called by the Rocket Ride pipeline) | Pricing Data | 1 |
 | Tenki | $200 | Sandboxes, CI runners, PR review for agent-written code | Engineer | 1–2 |
-| AdaL | (no credit info) | Primary build/execution platform | Engineer | 1 |
 | Querit | $100 | Web search for market, competitor, and fee research; trend checks | Market Research | 1 |
 | Glasser.ai | $10 | A few targeted lookups only: reseller creators and communities for outreach | Growth | 2 |
 | Ask the W | 30-day trial | TBD: what it does is unclear | — | ? |
 | Voiskey | None found | Fallback: browser speech. Ask their booth about an API | Engineer | — |
-| BAND | None found | Fallback: Kylon task threads for handoffs. Worth asking: $500 cash prize | CEO | — |
 | Paritok | None found | Fallback: summarize long context ourselves | — | — |
 | Finch | None found | Check whether submitting a skill is free | Pricing Data | 2 |
 

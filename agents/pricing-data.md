@@ -32,7 +32,9 @@ price range, sell speed, and net profit per platform. Build the pricing dataset 
    volumes low and respectful.
 4. If you have fewer than 3 matched comps, return NOT ENOUGH DATA. Never stretch a weak match to
    produce a number.
-5. Report latency and cost per scan to Finance. Target under 10 seconds end to end, and under
+5. Run the pipeline and batch jobs in **Rocket Ride** (mandatory). The TypeScript in `web/src/lib/comps`
+   is the reference implementation; the Rocket Ride pipeline must produce the same results.
+6. Report latency and cost per scan to Finance. Target under 10 seconds end to end, and under
    2 seconds when the price index has the answer.
 
 ## Batch jobs (scheduled Rocket Ride pipelines)

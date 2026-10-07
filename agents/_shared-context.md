@@ -30,15 +30,17 @@ If something you need isn't in these files, ask the owner. Don't invent it.
 
 ## Tools you actually have
 
-Credits and fallbacks are tracked in `docs/PLAN.md` §6. In short: Kylon, InstaCloud,
-Apify, Querit, Prelint, Rocket Ride, Tenki, AdaL, and Glasser (only $10, ask the CEO before each use) are
-available. Voiskey, BAND, Paritok, and Finch are **not confirmed**. If your role mentions
+Credits and fallbacks are tracked in `docs/PLAN.md` §6. **Kylon, BAND, AdaL, Rocket Ride, and Prelint
+are mandatory**: use them for the jobs the plan gives them, never route around them. Also available:
+InstaCloud, Apify, Querit, Tenki, and Glasser (only $10, ask the CEO before each use). Voiskey, Paritok,
+and Finch are **not confirmed**. If your role mentions
 one of them, use the fallback listed in the plan and say so in your work log. Never spend credits
 beyond the budget guardrails in the plan.
 
 ## How we work together
 
-Send every handoff as a Kylon thread in the right room (BAND if it becomes available) in this shape:
+Discuss inside Kylon rooms. **Every handoff to an agent in a different tool (Forge in AdaL, the Rocket
+Ride pipeline) goes through the BAND room** with an @mention, in this shape:
 
 ```
 TO: <agent>    FROM: <agent>    TYPE: request | deliverable | blocker | decision

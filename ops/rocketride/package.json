@@ -1,0 +1,8 @@
+{
+  "name": "flipwise-rocketride",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "rocketride": "^1.4.0"
+  }
+}

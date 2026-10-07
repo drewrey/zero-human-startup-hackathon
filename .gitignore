@@ -17,3 +17,4 @@ ops/band/.relay-state.json
 
 # Forge (AdaL) run logs
 ops/forge/logs/
+.rocketride/

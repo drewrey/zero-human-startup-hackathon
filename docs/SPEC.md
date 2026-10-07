@@ -84,6 +84,10 @@ Voice-first. Photo is optional (and later powers listing drafts).
     cannot override BR-4. This speed-independent rule does not settle the separate
     BR-2/BR-3 fee-input contract in PR #4.
   - **MAYBE:** `0 < net_profit < min_profit`.
+  - **Conservative fee base (Phase 1):** platform fees are computed on item price **plus**
+    assumed buyer-paid shipping and assumed sales tax, from config `FEE_BASE_ASSUMPTIONS`
+    (defaults: $10 shipping, 10% of item price). These are assumptions, not data; the card labels
+    the profit an ESTIMATE and states them. Implemented in PR #20.
   - The user setting `min_profit` defaults to $10 (to be checked with users). Retain
     `max_days = 30` for later research but **ignore it** in Phase 1 verdicts. Unknown,
     missing or low speed never changes BUY/PASS/MAYBE. This is a Phase 1 scope decision,

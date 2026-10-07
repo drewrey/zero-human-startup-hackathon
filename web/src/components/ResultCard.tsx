@@ -99,7 +99,12 @@ export function ResultCard({
         )}
 
         {result.dataSource === "live" && result.platforms.length <= 1 && (
-          <p className="text-xs text-muted">eBay sold listings, last 90 days. More marketplaces coming.</p>
+          <p className="text-xs text-muted">
+            eBay sold listings, last 90 days
+            {result.dataAsOf &&
+              ` · as of ${new Date(result.dataAsOf).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`}
+            . More marketplaces coming.
+          </p>
         )}
 
         <div className="flex flex-wrap gap-2 text-xs">

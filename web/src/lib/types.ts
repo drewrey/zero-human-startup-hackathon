@@ -90,6 +90,8 @@ export interface PriceCheckResult {
   reason: string;
   spoken: string;
   dataSource: DataSource;
+  /** BR-19: when the comps were fetched; null for demo data. */
+  dataAsOf: string | null;
   understoodBy: UnderstoodBy;
 }
 

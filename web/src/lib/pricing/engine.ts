@@ -184,6 +184,7 @@ export interface PriceCheckInput {
   settings: Settings;
   now: Date;
   dataSource: DataSource;
+  dataAsOf?: string | null;
   understoodBy: UnderstoodBy;
 }
 
@@ -200,6 +201,7 @@ export function priceCheck(input: PriceCheckInput): PriceCheckResult {
     assumptions: input.assumptions,
     platforms,
     dataSource: input.dataSource,
+    dataAsOf: input.dataAsOf ?? null,
     understoodBy: input.understoodBy,
   };
 

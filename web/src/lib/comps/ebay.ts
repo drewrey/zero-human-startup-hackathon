@@ -75,17 +75,10 @@ export function toPlatformListings(rows: Row[]): PlatformListings {
   return { platform: "ebay", sold, soldLast30d, activeListings: summary?.totalActive ?? 0 };
 }
 
-const cache = new Map<string, { at: number; listings: PlatformListings }>();
-const CACHE_MS = 24 * 60 * 60 * 1000;
-
-export async function fetchEbayListings(item: ItemAttributes): Promise<PlatformListings> {
+/** Live fetch for one search query. Callers go through the price index (price-index.ts). */
+export async function fetchEbayByQuery(query: string): Promise<PlatformListings> {
   const token = process.env.APIFY_TOKEN;
   if (!token) throw new Error("APIFY_TOKEN is not set");
-
-  const query = ebayQuery(item);
-  const key = query.toLowerCase();
-  const hit = cache.get(key);
-  if (hit && Date.now() - hit.at < CACHE_MS) return hit.listings;
 
   const url = new URL(`https://api.apify.com/v2/acts/${ACTOR}/run-sync-get-dataset-items`);
   url.searchParams.set("timeout", "60");
@@ -107,8 +100,12 @@ export async function fetchEbayListings(item: ItemAttributes): Promise<PlatformL
     signal: AbortSignal.timeout(75_000),
   });
   if (!res.ok) throw new Error(`Apify eBay run failed: ${res.status} ${await res.text().catch(() => "")}`);
-
-  const listings = toPlatformListings((await res.json()) as Row[]);
-  cache.set(key, { at: Date.now(), listings });
-  return listings;
+  return toPlatformListings((await res.json()) as Row[]);
 }
+
+/** Start + summary events plus per-listing charge; worst case before we know the count. */
+export function estimateEbayCostUsd(listings: PlatformListings | null): number {
+  return 0.04 + 0.003 * (listings ? listings.sold.length : MAX_LISTINGS);
+}
+
+export const ebayFetcher = { query: ebayQuery, fetch: fetchEbayByQuery, estimateCostUsd: estimateEbayCostUsd };

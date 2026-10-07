@@ -29,7 +29,7 @@ agent-work log) so judges can see evidence of the work it did.
 
 ## Role prompts
 
-Each agent's system prompt = `_shared-context.md` + its role file.
+Each agent's system prompt = `_shared-context.md` + its role file. Setup steps and first assignments: `KICKOFF.md`.
 
 | Agent | Prompt | Phase |
 |---|---|---|

@@ -1,5 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
+import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import type { Turn } from "../types";
 import { UnderstandingSchema, type Understanding } from "./schema";
 
@@ -24,20 +25,27 @@ export async function understandWithClaude(conversation: Turn[], followUpsAllowe
     .map((t) => `${t.role === "sourcer" ? "Reseller" : "Assistant"}: ${t.text}`)
     .join("\n");
 
-  const response = await client.beta.messages.parse({
-    model: MODEL,
-    max_tokens: 2000,
-    betas: ["server-side-fallback-2026-07-01"],
-    fallbacks: "default",
-    system: SYSTEM,
-    output_config: { effort: "low", format: betaZodOutputFormat(UnderstandingSchema) },
-    messages: [
-      {
-        role: "user",
-        content: `${transcript}\n\nFollow-up questions allowed: ${followUpsAllowed ? "yes" : "no"}`,
-      },
-    ],
-  });
+  const userMessage = `${transcript}\n\nFollow-up questions allowed: ${followUpsAllowed ? "yes" : "no"}`;
+
+  // Through a proxy (e.g. Kylon's Anthropic-compatible route, ANTHROPIC_BASE_URL), send a plain
+  // Messages request: proxies may not pass beta headers or the server-side `fallbacks` parameter.
+  const response = process.env.ANTHROPIC_BASE_URL
+    ? await client.messages.parse({
+        model: MODEL,
+        max_tokens: 2000,
+        system: SYSTEM,
+        output_config: { format: zodOutputFormat(UnderstandingSchema) },
+        messages: [{ role: "user", content: userMessage }],
+      })
+    : await client.beta.messages.parse({
+        model: MODEL,
+        max_tokens: 2000,
+        betas: ["server-side-fallback-2026-07-01"],
+        fallbacks: "default",
+        system: SYSTEM,
+        output_config: { effort: "low", format: betaZodOutputFormat(UnderstandingSchema) },
+        messages: [{ role: "user", content: userMessage }],
+      });
 
   if (response.stop_reason === "refusal") throw new Error("The model declined to process this item.");
   if (!response.parsed_output) throw new Error(`Could not parse item attributes (stop_reason: ${response.stop_reason}).`);

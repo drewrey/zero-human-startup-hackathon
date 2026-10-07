@@ -1,19 +1,36 @@
 import type { DataSource, ItemAttributes, PlatformListings } from "../types";
 import { fetchDemoListings } from "./demo";
-import { fetchEbayListings } from "./ebay";
+import { ebayFetcher } from "./ebay";
+import { lookup } from "./price-index";
+import { getStore } from "./store";
+
+export interface CompsResult {
+  listings: PlatformListings[];
+  /** When the underlying data was fetched (BR-19). */
+  asOf: string | null;
+}
 
 export interface CompsSource {
   dataSource: DataSource;
-  fetch(item: ItemAttributes, now: Date): Promise<PlatformListings[]>;
+  fetch(item: ItemAttributes, now: Date): Promise<CompsResult>;
 }
 
 /**
- * Live eBay comps when APIFY_TOKEN is set; otherwise clearly labeled demo data.
- * Poshmark, Depop, and Mercari providers plug in here as additional live sources.
+ * Live eBay comps (through the price index) when APIFY_TOKEN is set; otherwise labeled demo data.
+ * Poshmark, Depop, and Mercari plug in here as additional live sources.
  */
 export function getCompsSource(): CompsSource {
   if (process.env.APIFY_TOKEN && process.env.COMPS_SOURCE !== "demo") {
-    return { dataSource: "live", fetch: async (item) => [await fetchEbayListings(item)] };
+    return {
+      dataSource: "live",
+      fetch: async (item, now) => {
+        const r = await lookup(getStore(), ebayFetcher, item, now);
+        return { listings: [r.listings], asOf: r.asOf };
+      },
+    };
   }
-  return { dataSource: "demo", fetch: fetchDemoListings };
+  return {
+    dataSource: "demo",
+    fetch: async (item, now) => ({ listings: await fetchDemoListings(item, now), asOf: null }),
+  };
 }

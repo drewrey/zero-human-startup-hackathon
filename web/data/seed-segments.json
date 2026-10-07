@@ -1,0 +1,16 @@
+{
+  "_comment": "Pre-warm list for the price index: high-volume resale apparel models. Owned by the Pricing Data agent. Each entry × each size = one Apify lookup (~$0.16).",
+  "segments": [
+    { "brand": "Patagonia", "variant": "Synchilla", "type": "fleece pullover", "gender": "men", "sizes": ["M", "L"] },
+    { "brand": "Patagonia", "variant": "Better Sweater", "type": "fleece jacket", "gender": "men", "sizes": ["M", "L"] },
+    { "brand": "Patagonia", "variant": "Nano Puff", "type": "puffer jacket", "gender": "men", "sizes": ["M", "L"] },
+    { "brand": "Patagonia", "variant": "Better Sweater", "type": "fleece jacket", "gender": "women", "sizes": ["S", "M"] },
+    { "brand": "The North Face", "variant": "Nuptse", "type": "puffer jacket", "gender": "men", "sizes": ["M", "L"] },
+    { "brand": "The North Face", "variant": "Denali", "type": "fleece jacket", "gender": "women", "sizes": ["S", "M"] },
+    { "brand": "Arc'teryx", "variant": "Atom LT", "type": "jacket", "gender": "men", "sizes": ["M", "L"] },
+    { "brand": "Lululemon", "variant": "Align", "type": "leggings", "gender": "women", "sizes": ["4", "6"] },
+    { "brand": "Lululemon", "variant": "Define", "type": "jacket", "gender": "women", "sizes": ["4", "6"] },
+    { "brand": "Carhartt", "variant": "Detroit", "type": "jacket", "gender": "men", "sizes": ["M", "L"] },
+    { "brand": "Levi's", "variant": "501", "type": "jeans", "gender": "men", "sizes": ["32x30", "34x32"] }
+  ]
+}

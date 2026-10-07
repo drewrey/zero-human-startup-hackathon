@@ -1,4 +1,5 @@
 import { getCompsSource } from "@/lib/comps";
+import { BudgetExceededError } from "@/lib/comps/price-index";
 import { DEFAULT_SETTINGS } from "@/lib/config";
 import { priceCheck } from "@/lib/pricing/engine";
 import { PLATFORMS, type CheckRequest, type CheckResponse, type Settings } from "@/lib/types";
@@ -43,19 +44,29 @@ export async function POST(request: Request): Promise<Response> {
 
     const source = getCompsSource();
     const now = new Date();
-    const listings = await source.fetch(u.item, now);
+    const comps = await source.fetch(u.item, now);
     const result = priceCheck({
       item: u.item,
       assumptions: u.assumptions,
-      listings,
+      listings: comps.listings,
       settings: sanitizeSettings(body.settings),
       now,
       dataSource: source.dataSource,
+      dataAsOf: comps.asOf,
       understoodBy: u.understoodBy,
     });
     // TODO(Pricing Data, BR-16): persist the scan once the backend is chosen.
     return Response.json({ kind: "result", result } satisfies CheckResponse);
   } catch (error) {
+    if (error instanceof BudgetExceededError) {
+      return Response.json(
+        {
+          kind: "error",
+          message: "New price lookups are paused for today to stay on budget. Items checked before still work.",
+        } satisfies CheckResponse,
+        { status: 429 },
+      );
+    }
     console.error("price check failed", error);
     return Response.json(
       {

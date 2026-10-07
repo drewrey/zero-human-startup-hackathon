@@ -136,6 +136,9 @@ Voice-first. Photo is optional (and later powers listing drafts).
 - **BR-20 Fallback and growth:** on an index miss, fetch live, answer, and add the segment to the index.
   Scheduled batch jobs keep the index fresh and grow it from scan history (see
   `agents/pricing-data.md`). Index and live answers use the same rules (BR-1 to BR-12).
+- **BR-21 Spend cap:** live marketplace lookups stop for the day once spend reaches
+  `APIFY_DAILY_BUDGET_USD` (default $3). Index answers keep working; a new item gets a clear
+  "lookups paused for today" message instead of a verdict. Batch jobs run under their own per-run cap.
 
 ## 4. Phase 1 scope (today)
 

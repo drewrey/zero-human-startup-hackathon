@@ -12,4 +12,4 @@
 
 | Decision | Owner | Inputs needed | Founder approval | Status |
 |---|---|---|---|---|
-| Which model powers item understanding in the live flow (Claude via API key, or a model step inside a Rocket Ride pipeline using sponsor credits) | CEO | Engineer: latency per lookup on a phone (target < 2s for this step). Finance: cost per scan. PM: accuracy on 20 real spoken descriptions. | Yes, it spends money | Open. The keyword parser is the fallback meanwhile |
+| Which model powers item understanding in the live flow: Claude through Kylon's Anthropic-compatible proxy (Kylon credits, supported in code via `ANTHROPIC_BASE_URL`), a direct Claude API key, or a model step inside a Rocket Ride pipeline | CEO | Engineer: latency per lookup on a phone (target < 2s for this step). Finance: cost per scan. PM: accuracy on 20 real spoken descriptions. | Yes, it spends money | Open. The keyword parser is the fallback meanwhile |

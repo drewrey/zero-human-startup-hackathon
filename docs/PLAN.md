@@ -98,11 +98,16 @@ tier; until then each has a fallback.
 | Paritok | None found | Fallback: summarize long context ourselves | — | — |
 | Finch | None found | Check whether submitting a skill is free | Pricing Data | 2 |
 
+**InsForge vs. InstaCloud** (same team, different products): InstaCloud runs our app container,
+Postgres, and storage, and is what we use. InsForge is a backend-as-a-service (auth, database APIs,
+model gateway, frontend hosting); we'd only add it if we need user sign-in quickly.
+
 ### Budget guardrails
 
-- **Apify ($100):** the largest real cost. Cache every query for 24h (index for 7 days per BR-19),
-  cap live fetches per day, and have Pricing Data report spend daily. If spend passes $50 before
-  Oct 10, the CEO decides what to cut.
+- **Apify ($100):** the largest real cost, ~$0.16 per new lookup. Every lookup checks the price index
+  first (fresh for 7 days, BR-18/19), live lookups stop at $3/day (BR-21), and pre-warming popular
+  segments costs ~$3.50 per full refresh. Pricing Data reports spend daily. If spend passes $50
+  before Oct 10, the CEO decides what to cut.
 - **Glasser ($10):** roughly a handful of queries. Growth proposes each one; the CEO approves.
 - **Kylon ($100), Tenki ($200), Prelint ($250), Querit ($100):** no cap expected this week; Finance tracks totals.
 - **Model calls:** not covered by any sponsor. See the open decision in `docs/decisions.md`.

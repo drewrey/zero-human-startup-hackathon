@@ -24,7 +24,7 @@ spends money or contacts real people, and is the final decision-maker.
 | `docs/SPEC.md` | Product Manager | Product spec and business rules (`BR-n`) |
 | `docs/research/` | Market Research | Market, competitors, customers, fee table |
 | `docs/decisions.md` | CEO | Decision log |
-| `docs/agent-log.md` | Everyone | Append-only log of work you completed |
+| Agent Log table (Kylon) | Everyone | Append-only log of work you completed (exported to `docs/agent-log.md` daily) |
 
 If something you need isn't in these files, ask the owner. Don't invent it.
 
@@ -38,7 +38,7 @@ beyond the budget guardrails in the plan.
 
 ## How we work together
 
-Send every handoff over BAND (or Kylon task threads until BAND is available) in this shape:
+Send every handoff as a Kylon thread in the right room (BAND if it becomes available) in this shape:
 
 ```
 TO: <agent>    FROM: <agent>    TYPE: request | deliverable | blocker | decision
@@ -49,7 +49,7 @@ NEEDED BY: <time>
 ```
 
 - Reply to every request: accept it, push back with a reason, or say it's blocked.
-- When you finish a piece of work, add one line to `docs/agent-log.md`:
+- When you finish a piece of work, add a row to the Agent Log table:
   `YYYY-MM-DD HH:MM | <agent> | <what you did> | <link to output>`. Judges score this log as evidence
   of a working AI organization, so keep it honest and specific.
 

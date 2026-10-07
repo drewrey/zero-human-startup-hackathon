@@ -127,6 +127,12 @@ Voice-first. Photo is optional (and later powers listing drafts).
 
 - **BR-11 Matching:** a comp matches if brand and item type match and, when known, size, gender, and
   model/variant match. Condition mismatches are allowed but weighted lower (Phase 2).
+  Distinguish garment abbreviations from sizes: `L/S` means long sleeve, not size L;
+  an explicit `XXL` later in the same title overrides any apparent earlier `L`. A known
+  incompatible size must be excluded from the median and comp count, with the exclusion
+  visible in the comps explanation. A title with no verified size is unknown, not proof of
+  the requested size; note that assumption rather than silently call it an exact match.
+  Do not label a loose item-type or condition match as an exact comparable sale.
 - **BR-12 Outliers:** drop sold prices outside `[Q1 − 1.5·IQR, Q3 + 1.5·IQR]` before computing the
   median. Lots/bundles ("lot of 5") are excluded.
 
@@ -202,6 +208,14 @@ If only one platform is live, BR-8 still runs; it simply has one candidate.
 - No tag price → card shows "Worth it under $X", no BUY/PASS (BR-7).
 - Never more than 2 follow-up questions per item (BR-6).
 - Fewer than 3 matched sold comps across platforms → NOT ENOUGH DATA regardless of speed (BR-5).
+- A men's size L Old Navy tee search must exclude a sold `L/S ... XXL thermal Henley`
+  from the size-L comp count and median. The `L/S` token means long-sleeve, while `XXL`
+  is an explicit incompatible size. A no-size/new-with-tags graphic tee and a running
+  shirt require explicit item/condition checks or unknown-match labeling, not an
+  unqualified exact-comp claim (BR-11). This real probe is a regression counterexample,
+  not a validated nine-comp median: [sold listing with conflicting size](https://www.ebay.com/itm/147550033029),
+  [size-unspecified graphic tee](https://www.ebay.com/itm/820190358776),
+  [running shirt](https://www.ebay.com/itm/237108282330) (checked 2026-10-07).
 - Fewer than 3 matching sales in the 30-day speed window, zero active listings, or incomplete
   sold/active coverage → speed unknown. Positive-profit cases become MAYBE, never BUY solely
   from a missing speed count; negative or zero profit remains PASS (BR-4, BR-5, BR-10).

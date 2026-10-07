@@ -90,10 +90,10 @@ tier; until then each has a fallback.
 | Rocket Ride | Cloud code | Price-check pipeline, nightly batch jobs, feedback pipeline | Pricing Data | 1–2 |
 | Tenki | $200 | Sandboxes, CI runners, PR review for agent-written code | Engineer | 1–2 |
 | AdaL | (no credit info) | Primary build/execution platform | Engineer | 1 |
+| Querit | $100 | Web search for market, competitor, and fee research; trend checks | Market Research | 1 |
 | Glasser.ai | $10 | A few targeted lookups only: reseller creators and communities for outreach | Growth | 2 |
 | Ask the W | 30-day trial | TBD: what it does is unclear | — | ? |
 | Voiskey | None found | Fallback: browser speech. Ask their booth about an API | Engineer | — |
-| Querit | None found | Fallback: Apify + model web search for research | Market Research | — |
 | BAND | None found | Fallback: Kylon task threads for handoffs. Worth asking: $500 cash prize | CEO | — |
 | Paritok | None found | Fallback: summarize long context ourselves | — | — |
 | Finch | None found | Check whether submitting a skill is free | Pricing Data | 2 |
@@ -104,7 +104,7 @@ tier; until then each has a fallback.
   cap live fetches per day, and have Pricing Data report spend daily. If spend passes $50 before
   Oct 10, the CEO decides what to cut.
 - **Glasser ($10):** roughly a handful of queries. Growth proposes each one; the CEO approves.
-- **Kylon ($100), Tenki ($200), Prelint ($250):** no cap expected this week; Finance tracks totals.
+- **Kylon ($100), Tenki ($200), Prelint ($250), Querit ($100):** no cap expected this week; Finance tracks totals.
 - **Model calls:** not covered by any sponsor beyond InsForge's $1. See the open decision in
   `docs/decisions.md`.
 
@@ -136,6 +136,6 @@ tier; until then each has a fallback.
 
 - Team: solo or 2? Who owns what?
 - Ask the W: what is it, and is it useful here?
-- Voiskey, Querit, BAND, Paritok, Finch: any free tier or hackathon access?
+- Voiskey, BAND, Paritok, Finch: any free tier or hackathon access?
 - Do we have access to real resellers to test with this week?
 - Default thresholds ($10 min profit, 30 days) — validate with the first few users.

@@ -6,6 +6,7 @@
   "scripts": {
     "band:setup": "node ops/band/setup.mjs",
     "band:relay": "node ops/band/relay.mjs",
-    "band": "node ops/band/cli.mjs"
+    "band": "node ops/band/cli.mjs",
+    "forge": "node ops/forge/run.mjs"
   }
 }

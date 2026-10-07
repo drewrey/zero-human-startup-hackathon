@@ -16,6 +16,8 @@ sold comps across marketplaces, expected profit after fees, and a BUY / PASS cal
 | `agents/` | The AI founding team: roster, handoffs, and per-agent role prompts |
 | `web/` | The MVP: mobile-first Next.js app (see `web/README.md`) |
 | `ops/band/` | BAND setup, Kylon ↔ BAND relay, and CLI for local agents |
+| `ops/forge/` | Runs Forge (engineer) in AdaL on its BAND requests (`npm run forge`) |
+| `docs/local-setup.md` | Everything installed locally for this project, and how to remove it |
 
 ## How changes land
 

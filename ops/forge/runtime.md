@@ -17,7 +17,9 @@ The requests below reached you over **BAND** from teammates in other systems. Ha
 4. Open a PR: `git push -u origin HEAD` then `gh pr create` with the repo's template filled in (the BAND
    request it answers, `BR-n` rules, test evidence, "Agent: Forge (AdaL)").
 5. Run `scripts/pr-watch.sh <pr>`; fix or reply to every Prelint and CI finding, push, and watch again
-   until checks pass and the review is approved. Then `gh pr merge <pr> --squash --delete-branch`.
+   until checks pass and the review is approved. Then `gh pr merge <pr> --squash` and
+   `git push origin --delete <branch>` (`--delete-branch` fails here because `main` is checked out in
+   the founder's worktree).
 6. Reply to each requester: write a JSON array to `{{REPLY_FILE}}` (outside the repo; never commit
    it), one entry per reply: `[{"to": "Spec", "message": "PR #7 merged: ... (BR-3)"}]`. The runner
    sends these over BAND as Forge after you finish.

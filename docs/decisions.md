@@ -8,6 +8,7 @@
 | 2026-10-07 | Host on InstaCloud (app container, Postgres, storage) | InstaCloud vs. InsForge Sites vs. other hosts | Sponsor credit; InstaCloud (from the InsForge team) runs our Next.js app as a container and gives us Postgres + storage for the price index | Founder |
 | 2026-10-07 | Kylon, BAND, AdaL, Rocket Ride, Prelint are mandatory and each gets a real job (see PLAN §6) | Optional use with fallbacks | Hackathon requirement | Founder |
 | 2026-10-07 | Next.js mobile web app, mobile-first | Native app | Fastest to ship and demo on any phone | Founder |
+| 2026-10-07 | Rebrand deferred: keep "Flipwise" for the Phase 1 demo; voice-led positioning ("Spot it. Say it. Know whether to buy it.") recorded as a draft in `docs/brand/positioning-draft.md` | Rebrand before today's demo; adopt the draft now; defer | A rebrand can't land before the demo without displacing verdict and fee-safety work, and the copy is untested with resellers. Revisit after the demo, without expanding Oct 11 scope | Founder (on Spec's recommendation) |
 
 ## Open decisions
 

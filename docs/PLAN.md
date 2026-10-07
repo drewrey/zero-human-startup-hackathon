@@ -1,6 +1,6 @@
 # Hackathon Plan
 
-Status: draft v0 — Oct 7, 11:30 AM. Open questions at the bottom; sourcer-experience decisions pending.
+Status: draft v1 — Oct 7. Sourcer experience decided (see §3 and `docs/SPEC.md`). Open logistics questions at the bottom.
 
 ## 1. Goal
 
@@ -16,35 +16,45 @@ Judged on: product, AI organization, execution, validation, GTM, traction, final
 | Working name | TBD — candidates: *Flipwise*, *CompCheck*, *ThriftSense*, *PassOrBuy* (Brand agent to propose + check domains) |
 | Problem | Resellers make buy decisions in-store in seconds with no data; bad buys become dead inventory. Pricing knowledge is tribal and fragmented across eBay, Poshmark, Mercari, Depop. |
 | ICP | Part-time / side-hustle clothing & household resellers sourcing at thrift stores, Goodwill bins, garage and estate sales. |
-| Solution | Snap or speak an item → cross-marketplace sold comps → expected profit after fees → BUY / PASS. |
+| Solution | Describe an item by voice (photo optional) → cross-marketplace sold comps → expected profit after fees → spoken BUY / PASS + best platform. |
 | Why now | Multimodal models can identify items from a photo; resale keeps growing; marketplaces only show their own data. |
 | Moat / vision | Every scan adds to a cross-marketplace pricing dataset → pricing API for consignment, estate-sale, insurance, and resale platforms. |
 
-## 3. Phase 1 MVP scope (by 4 PM)
+## 3. Sourcer experience (decided)
 
-The smallest thing an investor can try on their phone:
+Full detail and business rules in `docs/SPEC.md`.
 
-1. Open a mobile web page.
-2. Take/upload a photo (+ optional typed or spoken detail and the tag price).
-3. Item is identified (brand, category, size, condition) — user can correct it.
-4. Sold comps are pulled for that item.
-5. Result card: price range, median sold, # comps, est. sell speed, profit after fees vs. tag price, **BUY / PASS**.
+- **Persona:** side-hustle reseller, apparel first.
+- **Input:** voice-first; photo optional (photos are low-signal for pricing but later power listing drafts).
+- **Follow-ups:** at most 2 short spoken questions, only for attributes that change price.
+- **Output:** spoken verdict through earbuds + result card on screen, from the same result object.
+- **Verdict:** BUY / MAYBE / PASS + numbers. Net profit must be positive to BUY; min profit and max days
+  to sell are per-user settings (defaults $10 / 30 days). No tag price → "Worth it under $X".
+- **Platforms:** compare eBay, Poshmark, Depop, Mercari; recommend the sourcer's home platform unless
+  another beats it by a clear margin. Later: personalized "you'd net more on X" suggestions.
+- **After the verdict:** see the comps behind it; save to today's haul with trip totals.
 
-**In:** one category to start (see open questions), one marketplace's sold data (eBay) if time is short.
-**Out for Phase 1:** accounts, inventory, listing generation, crosslisting, multiple marketplaces, offline mode.
+## 3a. Phase 1 MVP scope (by 4 PM)
+
+**In:** voice capture, attribute extraction + follow-ups, eBay sold comps, verdict card + spoken answer,
+comps view, haul (stored on device), basic settings.
+**Stretch:** more platforms, optional photo for identification.
+**Out for Phase 1:** accounts, listing drafts from photo, crosslisting, household goods.
 
 ## 4. Architecture (proposed)
 
 ```
-Phone (PWA)
-  └─ photo / voice (Voiskey) / text
+Phone (PWA, earbuds)
+  └─ voice (Voiskey; browser speech API as fallback) + optional photo
        └─ API  ──►  Price-check pipeline (Rocket Ride; plain code first if faster)
-                      1. Identify item       vision LLM → {brand, type, size, condition, keywords}
+                      0. Understand          LLM → attributes; ask ≤2 follow-ups if price-relevant gaps
+                      1. Identify item       {brand, type, variant, size, gender, condition, tag price}
                       2. Fetch comps         Apify actor(s): eBay sold (+ Poshmark/Mercari/Depop later)
                       3. Normalize + filter  drop outliers / mismatches
                       4. Stats               median, IQR, comp count, sell-speed proxy
-                      5. Economics           fees + shipping → net profit vs. tag price
-                      6. Verdict             BUY / PASS + one-line reason
+                      5. Economics           per-platform fees + shipping → net profit vs. tag price
+                      6. Recommend + verdict home-platform bias → BUY / MAYBE / PASS → spoken text + card
+       ◄── text-to-speech (Voiskey) + result card
                     Store scans + comps (InsForge DB/storage) → becomes the pricing dataset
 Deploy: Instacloud (confirm vs. InsForge with organizers)
 Built by: AdaL (Engineer agent), reviewed in Tenki, checked against docs/SPEC.md by Prelint
@@ -108,13 +118,8 @@ and `Pricing Data agent runs the comp pipeline the product calls`.
 
 ## 10. Open questions
 
-Sourcer experience (being decided now):
-- Primary input: photo, voice, barcode/tag, or photo + voice?
-- Verdict style: hard BUY/PASS, score, or price range only?
-- Starting category: apparel, household, or both?
-- What happens after a scan: save to haul, draft listing, nothing?
-
-Logistics:
 - Team: solo or 2? Who owns what?
 - Instacloud vs. InsForge — which counts for the prize/requirement?
+- Sponsor access: which tools do we already have accounts/keys for?
 - Do we have access to real resellers to test with this week?
+- Default thresholds ($10 min profit, 30 days) — validate with the first few users.

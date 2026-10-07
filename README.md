@@ -14,7 +14,7 @@ sold comps across marketplaces, expected profit after fees, and a BUY / PASS cal
 | `docs/PLAN.md` | Hackathon plan: timeline, MVP scope, architecture, sponsor tool map |
 | `docs/SPEC.md` | Product spec + business rules (the source of truth Prelint checks against) |
 | `agents/` | The AI founding team: roster, handoffs, and per-agent role prompts |
-| `app/` | The MVP (to be scaffolded) |
+| `web/` | The MVP: mobile-first Next.js app (see `web/README.md`) |
 
 ## Event
 

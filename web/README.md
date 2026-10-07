@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sourcing copilot (web)
 
-## Getting Started
+Mobile-first Next.js app. A reseller describes an item by voice (or types it), answers up to two
+follow-up questions, and gets a spoken + on-screen BUY / MAYBE / PASS with profit per platform.
 
-First, run the development server:
+Spec: [`../docs/SPEC.md`](../docs/SPEC.md). Business rules are referenced as `BR-n` in code and tests.
+
+## Run
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev        # http://localhost:3000 — open on your phone via your LAN IP, or use the phone-size view in browser devtools
+npm test           # business-rule tests
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Voice uses the browser's Web Speech API (works best in Chrome and Safari; mic access needs
+`localhost` or HTTPS). There's always a text box as a fallback.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Configuration
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Copy `.env.example` to `.env.local`.
 
-## Learn More
+| Variable | Effect |
+|---|---|
+| `ANTHROPIC_API_KEY` | Enables Claude for understanding speech. Without it, a simple keyword parser is used. |
+| `CLAUDE_MODEL` | Defaults to `claude-opus-5-5`. |
+| `UNDERSTAND_MODE` | `auto` (default), `claude`, or `heuristic`. |
 
-To learn more about Next.js, take a look at the following resources:
+## What's real vs. placeholder
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Part | Status |
+|---|---|
+| Pricing, verdict, platform recommendation (`src/lib/pricing`) | Implemented and tested against SPEC |
+| Speech understanding (`src/lib/understand`) | Claude with structured output; keyword fallback |
+| Sold comps (`src/lib/comps`) | **Demo data only** (clearly labeled in the UI). Apify-backed live data is next |
+| Fees (`src/lib/config.ts`) | **Unverified placeholders** until Market Research fills `docs/research/fees.md` |
+| Voice | Browser speech; Voiskey to replace it |
+| Haul + settings | Stored on the device (localStorage) |
+| Scan storage (BR-16) | Not yet; waiting on backend choice |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Layout
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/app/page.tsx              entry
+src/app/api/check/route.ts    conversation → follow-up or price check
+src/components/               SourcerApp (voice screen), ResultCard, Panels (comps, haul, settings)
+src/lib/pricing/              engine.ts (BR-1…BR-15), stats.ts, tests
+src/lib/understand/           claude.ts, heuristic.ts, schema.ts
+src/lib/comps/                demo.ts provider (live provider goes here)
+src/lib/config.ts             fees, thresholds, bias (BR-3)
+```

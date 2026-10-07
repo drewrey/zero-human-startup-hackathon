@@ -81,9 +81,11 @@ Voice-first. Photo is optional (and later powers listing drafts).
 - **BR-6 Follow-up questions:** at most 2 per item. Only ask about attributes that change price
   (model/variant, size, gender, condition, era). Otherwise proceed and state assumptions on the card
   ("Assumed: men's, good condition").
-- **BR-7 Missing tag price:** if the sourcer gives no tag price, do not output BUY/PASS. Instead output a
-  **max buy price**: the highest tag price at which BR-5 would still return BUY. Spoken as
-  "Worth it under $X."
+- **BR-7 Missing tag price:** if the sourcer gives no tag price, output a **max buy price** instead of
+  BUY/PASS: the highest whole-dollar tag price at which net profit still clears `min_profit` (and stays
+  > $0). Spoken as "Worth it under $X." If it sells too slowly (`est_days_to_sell > max_days`), the
+  verdict is MAYBE with the max price ("Slow seller, about N days. Worth it under $X."). If no tag price
+  would clear `min_profit`, the verdict is PASS ("Even free, only about $N profit").
 - **BR-13 Low confidence:** with 3–5 matched comps, the verdict shows a "low confidence" label and the
   spoken answer says so.
 

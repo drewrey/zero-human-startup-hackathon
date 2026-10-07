@@ -1,0 +1,10 @@
+{
+  "_comment": "Kylon workspace 'Circling Vultures' (a3fae6244774). Agent ids from `kylon workspace agent create`. Used by scripts/kylon-sync-skills.py.",
+  "repo": "https://github.com/drewrey/zero-human-startup-hackathon",
+  "agents": [
+    { "name": "Atlas", "id": "8c6d4143b545", "role_file": "ceo-strategy.md" },
+    { "name": "Scout", "id": "0caac1fec3b2", "role_file": "market-research.md" },
+    { "name": "Spec",  "id": "2d9d12f461be", "role_file": "product-manager.md" },
+    { "name": "Comp",  "id": "a0071f77e9a9", "role_file": "pricing-data.md" }
+  ]
+}

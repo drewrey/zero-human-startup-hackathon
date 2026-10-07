@@ -37,7 +37,8 @@ export function formatDate(item) {
 }
 
 export function parseResults(raw) {
-  if (raw?.error_code) {
+  // The live API reports success as error_code 200 with an empty error_msg (0 also means success).
+  if (raw?.error_code && !(raw.error_code === 200 && !raw.error_msg)) {
     throw new Error(`Querit error ${raw.error_code}: ${raw.error_msg ?? "unknown"}`);
   }
   const items = raw?.results?.result;

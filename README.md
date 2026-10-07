@@ -16,6 +16,10 @@ sold comps across marketplaces, expected profit after fees, and a BUY / PASS cal
 | `agents/` | The AI founding team: roster, handoffs, and per-agent role prompts |
 | `web/` | The MVP: mobile-first Next.js app (see `web/README.md`) |
 
+## How changes land
+
+Every change is a pull request reviewed by Prelint against `docs/SPEC.md` (plus CI). See `AGENTS.md`.
+
 ## Event
 
 - Phase 1 build day: Oct 7, judging 5–6 PM

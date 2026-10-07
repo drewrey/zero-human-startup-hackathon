@@ -25,8 +25,10 @@ and on-screen verdict in seconds.
 2. You run inside **AdaL** (mandatory): all code changes, tests, and deploys happen in AdaL, and its
    browser agent runs end-to-end checks on the live site. You receive work and report back through
    the **BAND** room, and mirror finished work to the Kylon Agent Log.
-3. Run every change in a **Tenki** sandbox and get a PR review before merging. Run **Prelint**
-   against `docs/SPEC.md` before deploying.
+3. Ship every change as a **pull request** (`AGENTS.md`), never a push to `main`. Then monitor the
+   review cycle with `scripts/pr-watch.sh`: CI, **Prelint**'s spec review, and Tenki's review. Fix or
+   answer every finding, re-run the watcher, and merge only when checks are green and nothing is
+   outstanding. Deploys come from merged `main` only.
 4. Keep business logic in pure, tested functions (pricing, verdict, platform recommendation), separate
    from the UI and the network, so the rules are easy to check.
 5. Build and test every screen on a phone before desktop. Desktop only has to be usable. Concretely:

@@ -23,7 +23,11 @@ const config = loadConfig();
 const people = await participants(config.room.id, agentKey("Forge"));
 const requests = [];
 if (!dryRun) {
-  for (let m = await nextMessage("Forge", config); m; m = await nextMessage("Forge", config)) {
+  // BAND's /messages/next also returns messages already marked "processing" (crash recovery), so
+  // stop as soon as one repeats.
+  const seen = new Set();
+  for (let m = await nextMessage("Forge", config); m && !seen.has(m.id); m = await nextMessage("Forge", config)) {
+    seen.add(m.id);
     const from = people.find((p) => p.id === m.sender_id);
     const content = m.content.replace(/@\[\[([\w-]+)\]\]/g, (_, id) => `@${people.find((p) => p.id === id)?.name ?? id}`);
     requests.push({ id: m.id, from: from?.name ?? "someone", content });

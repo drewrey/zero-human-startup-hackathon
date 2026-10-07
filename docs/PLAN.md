@@ -28,8 +28,12 @@ Full detail and business rules in `docs/SPEC.md`.
 - **Input:** voice-first; photo optional (photos are low-signal for pricing but later power listing drafts).
 - **Follow-ups:** at most 2 short spoken questions, only for attributes that change price.
 - **Output:** spoken verdict through earbuds + result card on screen, from the same result object.
-- **Verdict:** BUY / MAYBE / PASS + numbers. Net profit must be positive to BUY; min profit and max days
-  to sell are per-user settings (defaults $10 / 30 days). No tag price → "Worth it under $X".
+- **Verdict:** BUY / MAYBE / PASS + numbers. Through the Oct 11, 2026 Phase 1 demo,
+  verdicts use estimated profit only: BUY at or above the user's minimum profit (and > $0),
+  PASS at or below $0, MAYBE in between, subject to the matched-comp minimum in BR-5.
+  `min_profit` defaults to $10. `max_days` remains a desired-window setting (default 30)
+  but does not affect the Phase 1 verdict. No tag price → "Worth it under $X".
+  Speed returns as a decision factor only in Phase 2 after comparable data and approval.
 - **Platforms:** compare eBay, Poshmark, Depop, Mercari; recommend the sourcer's home platform unless
   another beats it by a clear margin. Later: personalized "you'd net more on X" suggestions.
 - **After the verdict:** see the comps behind it; save to today's haul with trip totals.

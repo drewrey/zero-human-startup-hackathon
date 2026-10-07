@@ -22,12 +22,13 @@ Voice-first. Photo is optional (and later powers listing drafts).
 🎤  "Patagonia Synchilla, nine bucks"
 🔊  "Snap-T or quarter-zip? And what size?"          ← ≤ 2 follow-ups, only price-relevant
 🎤  "Snap-T, large"
-🔊  "Buy it. Best on eBay, about 32 profit."
+🔊  "Buy it. Best on eBay, about 32 estimated profit."
 📱  ┌──────────────────────────────┐
     │ ✅ BUY        +$32 on eBay ⭐ │
     │ Sold $38–$52 · median $45    │
-    │ 24 matched sold comps       │
+    │ 24 comps · fee estimate     │
     │ eBay $32 · Posh $29 · Depop $28
+    │ Shipping assumed buyer-paid│
     │ [why? → comps]  [+ haul]     │
     └──────────────────────────────┘
 ```
@@ -70,28 +71,25 @@ Voice-first. Photo is optional (and later powers listing drafts).
 
 ### Verdict
 
-- **BR-4 Hard rule:** a verdict is never BUY when net profit on the recommended platform is ≤ $0.
-  A positive item-price-only estimate is not evidence that the complete after-fees profit is
-  positive when required buyer shipping/tax inputs are missing. Do not silently treat missing
-  fee inputs as zero to manufacture BUY.
+- **BR-4 Hard rule:** a verdict is never BUY when estimated net profit on the recommended
+  platform is ≤ $0. Disclose the fee and shipping assumptions used by the estimate; do not
+  present an estimated profit as guaranteed proceeds. Fee-base precision is reviewed
+  separately under BR-2/BR-3.
 - **BR-5 Phase 1 verdict logic (founder-set, effective 2026-10-07 through the Oct 11, 2026 demo)**
   uses net profit on the recommended platform (BR-8), **not** sell speed:
   - **NOT ENOUGH DATA:** fewer than 3 matched sold comps across all platforms; check this first.
   - **PASS:** `net_profit <= 0`.
-  - **BUY:** `net_profit >= min_profit` and `net_profit > 0`, using the user's
-    `min_profit` (default $10), **only when all fee inputs required for the recommended
-    platform are complete**. A minimum of $0 still cannot override BR-4. Missing buyer
-    shipping/tax amounts are not explicit zeroes. This Phase 1 rule removes the speed
-    gate; it does not approve a fee approximation or alter the separate BR-2/BR-3 formula.
-  - **MAYBE:** positive estimated profit below `min_profit`, **or** a positive item-only
-    profit estimate missing fee inputs, even if its displayed estimate clears the user's
-    minimum. The latter carries an ESTIMATE label and a plain-language assumption on the
-    card. It is never called an exact after-fees profit.
+  - **BUY:** `net_profit >= min_profit` and `net_profit > 0` using the configured
+    fee and shipping scenario; disclose its assumptions on the result. A zero minimum
+    cannot override BR-4. This speed-independent rule does not settle the separate
+    BR-2/BR-3 fee-input contract in PR #4.
+  - **MAYBE:** `0 < net_profit < min_profit`.
   - The user setting `min_profit` defaults to $10 (to be checked with users). Retain
     `max_days = 30` for later research but **ignore it** in Phase 1 verdicts. Unknown,
     missing or low speed never changes BUY/PASS/MAYBE. This is a Phase 1 scope decision,
     not a claim of validated market demand; revisit speed gating only after comparable
-    data and a separately approved Phase 2 rule exist.
+    data and a separately approved Phase 2 rule exist. Spec owns a post-demo review
+    after Oct 11, 2026; Phase 2 activation requires the founder's decision.
 - **BR-6 Follow-up questions:** at most 2 per item. Only ask about attributes that change price
   (model/variant, size, gender, condition, era). Otherwise proceed and state assumptions on the card
   ("Assumed: men's, good condition").
@@ -123,7 +121,8 @@ Voice-first. Photo is optional (and later powers listing drafts).
   coverage; the fail-closed Speed unknown behavior from PR #14 remains in force. Do not
   invent a rate, convert a 90-day average into 30-day matched sales, or relax coverage to
   make a demo item look faster. No BUY threshold for sell speed is set for Phase 1.
-  In Phase 2, define a separately reviewed formula, comparable data contract and
+  Any retained `max_days` control must visibly say it does not affect this verdict;
+  hiding the inactive control for Phase 1 is also acceptable. In Phase 2, define a separately reviewed formula, comparable data contract and
   founder-approved threshold before reintroducing speed into verdicts.
 ### Comps
 
@@ -181,27 +180,28 @@ If only one platform is live, BR-8 still runs; it simply has one candidate.
 {
   "item": { "brand": "Patagonia", "type": "fleece pullover", "variant": "Synchilla Snap-T",
             "size": "L", "gender": "men", "condition": "good", "tag_price": 9.0 },
-  "assumptions": ["condition: good", "Profit estimate only — some fee details are missing"],
+  "assumptions": ["condition: good", "Fee scenario: buyer pays shipping; purchase tax setting applied"],
   "platforms": [
     { "platform": "ebay", "comps_used": 24, "median": 45, "p25": 38, "p75": 52,
       "fees": 6.0, "shipping": 0, "net_profit": 32.0,
       "speed": { "signal": "unknown", "coverageComplete": false } }
   ],
   "recommended_platform": "ebay",
-  "verdict": "MAYBE",
+  "verdict": "BUY",
   "confidence": "normal",
   "max_buy_price": null,
-  "spoken": "Maybe. eBay, about $32 estimated profit. Some fee details missing."
+  "spoken": "Buy it. Best on eBay, about 32 estimated profit."
 }
 ```
 
 ## 6. Acceptance checks (for Prelint / QA)
 
 - A result with negative net profit on the recommended platform is never BUY (BR-4).
-- With at least 3 matched sold comps and *complete* profit inputs, a $10 minimum profit:
-  net profit $10 or more → BUY, $0 or less → PASS, $0.01–$9.99 → MAYBE,
-  regardless of `speed.signal` (including `unknown`) or `max_days` (BR-4, BR-5, BR-10).
-  An incomplete fee-base input is never converted into an explicit zero for this test.
+- With at least 3 matched sold comps and a configured fee/shipping estimate, a $10
+  minimum profit: estimated net profit $10 or more → BUY, $0 or less → PASS,
+  $0.01–$9.99 → MAYBE, regardless of `speed.signal` (including `unknown`) or
+  `max_days` (BR-4, BR-5, BR-10). Card labels profit as an estimate and shows
+  the scenario assumptions; it never calls that amount guaranteed proceeds.
 - Changing `min_profit` changes the next verdict; changing `max_days` does not change
   a Phase 1 verdict (BR-5).
 - No tag price → show "Worth it under $X", not BUY/PASS; speed does not change X (BR-7).
@@ -212,12 +212,5 @@ If only one platform is live, BR-8 still runs; it simply has one candidate.
 - Neither card nor speech promises an individual days-to-sell value (BR-10, BR-14).
 - Spoken numbers equal card numbers (BR-14, BR-15).
 - Home platform is recommended when it is within the bias threshold of the best platform (BR-8).
-- Fee values come from config with a source and as-of date (BR-3). The eBay Synchilla
-  item-only example is a directional ESTIMATE, not a guaranteed or complete after-fees
-  BUY: the current engine only has sale/item price, tag price and the user's purchase-tax
-  setting; it does not collect actual buyer-paid shipping, buyer sales tax or an explicit
-  seller shipping discount/label choice. A complete-input eBay BUY needs those required
-  values (including verified explicit zero/not-applicable values) and the effective fee
-  rule; they cannot be supplied by the current item-only result. A future BR-2/BR-3
-  contract change must reconcile this gate and remove superseded fee scenario examples
-  in the same PR, not silently reinterpret the Phase 1 speed decision.
+- Fee values come from config with a source and as-of date (BR-3). This speed-only
+  scope does not approve a new fee-base contract; resolve PR #4 on its own merits.

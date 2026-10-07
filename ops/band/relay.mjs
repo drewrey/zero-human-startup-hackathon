@@ -39,7 +39,9 @@ async function readable(content) {
 
 async function inbound() {
   for (const a of kylonAgents) {
-    for (let msg = await nextMessage(a.name, config); msg; msg = await nextMessage(a.name, config)) {
+    const seen = new Set();
+    for (let msg = await nextMessage(a.name, config); msg && !seen.has(msg.id); msg = await nextMessage(a.name, config)) {
+      seen.add(msg.id);
       const sender = await person(msg.sender_id);
       const from = sender?.name ?? "someone";
       const text =
@@ -52,6 +54,14 @@ async function inbound() {
   }
 }
 
+/** "Forge: ..." or "Forge, ..." without the @ still means "@Forge". */
+function addressed(text) {
+  const t = text.trimStart();
+  if (t.startsWith("@")) return t;
+  const target = config.agents.find((a) => new RegExp(`^${a.name}\\s*[:,]`, "i").test(t));
+  return target ? `@${t}` : t;
+}
+
 async function outbound() {
   const res = await kylon("history", "recent", "--room", "all", "--since", state.since, "--limit", "50");
   const msgs = (res.details?.messages ?? []).slice().reverse(); // oldest first
@@ -59,9 +69,20 @@ async function outbound() {
     if (m.senderType !== "agent" || state.relayed.includes(m.id) || !OUTBOUND.test(m.content)) continue;
     const agent = kylonAgents.find((a) => a.name === m.senderName);
     if (!agent) continue;
-    await sendAs(agent.name, m.content.replace(OUTBOUND, ""), config);
+    // Each message is handled on its own, so one bad message can never block the ones after it.
     state.relayed.push(m.id);
-    console.log(`${new Date().toISOString()}  Kylon → BAND  ${agent.name} (#${m.roomName})`);
+    try {
+      await sendAs(agent.name, addressed(m.content.replace(OUTBOUND, "")), config);
+      console.log(`${new Date().toISOString()}  Kylon → BAND  ${agent.name} (#${m.roomName})`);
+    } catch (err) {
+      console.error(`${new Date().toISOString()}  undeliverable from ${agent.name}: ${err.message}`);
+      await kylon(
+        "message", "send", "--room", m.roomId, "--mentions", agent.kylonId,
+        "--text", `⚠️ @${agent.kylonId} the BAND relay couldn't deliver your message (${err.message.slice(0, 120)}). ` +
+          "Resend it as a root message starting `BAND → @Name:` with a BAND room member: " +
+          config.agents.map((a) => a.name).join(", ") + ".",
+      ).catch(() => {});
+    }
   }
   state.relayed = state.relayed.slice(-500);
   saveState();

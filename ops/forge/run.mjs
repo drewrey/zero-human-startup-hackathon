@@ -10,7 +10,7 @@ import { execFileSync, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { band, loadConfig, markProcessed, nextMessage, participants, agentKey, sendAs, ROOT } from "../band/lib.mjs";
+import { band, claimAll, loadConfig, markProcessed, participants, agentKey, sendAs, ROOT } from "../band/lib.mjs";
 
 const dryRun = process.argv.includes("--dry-run");
 const ADAL = path.join(os.homedir(), ".adal/bin/adal");
@@ -23,11 +23,7 @@ const config = loadConfig();
 const people = await participants(config.room.id, agentKey("Forge"));
 const requests = [];
 if (!dryRun) {
-  // BAND's /messages/next also returns messages already marked "processing" (crash recovery), so
-  // stop as soon as one repeats.
-  const seen = new Set();
-  for (let m = await nextMessage("Forge", config); m && !seen.has(m.id); m = await nextMessage("Forge", config)) {
-    seen.add(m.id);
+  for (const m of await claimAll("Forge", config)) {
     const from = people.find((p) => p.id === m.sender_id);
     const content = m.content.replace(/@\[\[([\w-]+)\]\]/g, (_, id) => `@${people.find((p) => p.id === id)?.name ?? id}`);
     requests.push({ id: m.id, from: from?.name ?? "someone", content });

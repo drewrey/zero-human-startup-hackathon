@@ -10,7 +10,7 @@ import { execFileSync, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { band, loadConfig, markProcessed, nextMessage, participants, agentKey, ROOT } from "../band/lib.mjs";
+import { band, loadConfig, markProcessed, nextMessage, participants, agentKey, sendAs, ROOT } from "../band/lib.mjs";
 
 const dryRun = process.argv.includes("--dry-run");
 const ADAL = path.join(os.homedir(), ".adal/bin/adal");
@@ -47,7 +47,8 @@ const role = [read("agents/_shared-context.md"), read("agents/engineer.md")].joi
 const reqText = requests.length
   ? requests.map((r, i) => `### Request ${i + 1} from ${r.from}\n\n${r.content}`).join("\n\n")
   : "_(dry run: no requests pulled)_";
-const task = read("ops/forge/runtime.md").replaceAll("{{MAIN}}", ROOT).replace("{{REQUESTS}}", reqText);
+const replyFile = path.join(os.tmpdir(), `forge-replies-${Date.now()}.json`);
+const task = read("ops/forge/runtime.md").replaceAll("{{REPLY_FILE}}", replyFile).replace("{{REQUESTS}}", reqText);
 const promptFile = path.join(os.tmpdir(), `forge-role-${Date.now()}.md`);
 fs.writeFileSync(promptFile, role);
 
@@ -56,18 +57,44 @@ if (dryRun) {
   process.exit(0);
 }
 
-// 4. Run AdaL headless. Full permissions are needed for git, gh, and npm; it is confined to the worktree.
+// 4. Run AdaL headless. It needs full tool permissions for git, gh, and npm, so least privilege is
+// enforced outside the agent instead of by asking it nicely:
+//   - a clean environment: none of the secrets this script loaded from .env.local are inherited;
+//   - a macOS sandbox that denies reading or writing the secret files and other CLIs' logins;
+//   - no BAND key: Forge writes its replies to a file and this script sends them afterwards.
+const SECRET_PATHS = [
+  ["literal", path.join(ROOT, ".env.local")],
+  ["literal", path.join(ROOT, "web/.env.local")],
+  ["literal", path.join(WT, ".env.local")],
+  ["literal", path.join(WT, "web/.env.local")],
+  ["subpath", path.join(os.homedir(), ".kylon")],
+  ["subpath", path.join(os.homedir(), ".insforge")],
+];
+const sandbox = `(version 1)(allow default)(deny file-read* file-write* ${SECRET_PATHS.map(([k, p]) => `(${k} ${JSON.stringify(p)})`).join(" ")})`;
+const ENV_ALLOW = ["PATH", "HOME", "USER", "LOGNAME", "SHELL", "LANG", "LC_ALL", "TERM", "TMPDIR", "SSH_AUTH_SOCK"];
+const env = Object.fromEntries(ENV_ALLOW.filter((k) => process.env[k]).map((k) => [k, process.env[k]]));
+
 fs.mkdirSync(LOGS, { recursive: true });
 const log = path.join(LOGS, `${new Date().toISOString().replace(/[:.]/g, "-")}.log`);
 console.log(`Forge (AdaL) working on ${requests.length} request(s). Log: ${log}`);
-const run = spawnSync(ADAL, ["-q", task, "--prompt-file", promptFile, "--permission-mode", "yolo", "-o", "text"], {
+const run = spawnSync("/usr/bin/sandbox-exec", ["-p", sandbox, ADAL, "-q", task, "--prompt-file", promptFile, "--permission-mode", "yolo", "-o", "text"], {
   cwd: WT,
+  env,
   encoding: "utf8",
   maxBuffer: 50 * 1024 * 1024,
 });
 fs.writeFileSync(log, `${run.stdout ?? ""}\n--- stderr ---\n${run.stderr ?? ""}`);
 
-// 5. Close out the BAND messages.
+// 5. Send Forge's replies over BAND (this script holds the key, not the agent).
+if (fs.existsSync(replyFile)) {
+  for (const r of JSON.parse(fs.readFileSync(replyFile, "utf8"))) {
+    await sendAs("Forge", `@${r.to} ${r.message}`, config);
+    console.log(`Forge → ${r.to} over BAND`);
+  }
+  fs.rmSync(replyFile);
+}
+
+// 6. Close out the BAND messages.
 for (const r of requests) {
   if (run.status === 0) await markProcessed("Forge", r.id, config);
   else await band("POST", `/agent/chats/${config.room.id}/messages/${r.id}/failed`, { key: agentKey("Forge") });

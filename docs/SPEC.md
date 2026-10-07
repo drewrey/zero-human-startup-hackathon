@@ -125,6 +125,18 @@ Voice-first. Photo is optional (and later powers listing drafts).
   This is the pricing dataset.
 - **BR-17** Haul totals: `spent = Σ purchase_cost`, `expected_profit = Σ net_profit on recommended platform`.
 
+### Price index (Phase 2)
+
+- **BR-18 Index first:** a lookup first checks the price index for the item's segment
+  (brand × item type × model × size × gender × platform). If a fresh entry exists with at least
+  `MIN_COMPS` comps, the answer comes from the index without a live fetch.
+- **BR-19 Freshness:** an index entry is fresh for 7 days (`INDEX_TTL_DAYS`, tunable). A stale entry
+  can still answer, labeled with its as-of date, and a refresh is queued in the background. The card
+  shows the data's as-of date either way.
+- **BR-20 Fallback and growth:** on an index miss, fetch live, answer, and add the segment to the index.
+  Scheduled batch jobs keep the index fresh and grow it from scan history (see
+  `agents/pricing-data.md`). Index and live answers use the same rules (BR-1 to BR-12).
+
 ## 4. Phase 1 scope (today)
 
 | In | Stretch | Out (Phase 2+) |

@@ -56,6 +56,8 @@ Phone (PWA, earbuds)
                       6. Recommend + verdict home-platform bias → BUY / MAYBE / PASS → spoken text + card
        ◄── text-to-speech (Voiskey) + result card
                     Store scans + comps (InsForge DB/storage) → becomes the pricing dataset
+                    Phase 2: price index checked first (BR-18); nightly batch jobs refresh and grow it,
+                    so live scraping is only needed for the long tail
 Deploy: Instacloud (confirm vs. InsForge with organizers)
 Built by: AdaL (Engineer agent), reviewed in Tenki, checked against docs/SPEC.md by Prelint
 ```

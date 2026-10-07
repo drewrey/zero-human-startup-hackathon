@@ -72,9 +72,10 @@ export function toPlatformListings(rows: Row[]): PlatformListings {
   const soldLast30d = summary?.soldPerDay != null
     ? Math.round(summary.soldPerDay * 30)
     : Math.round(((summary?.totalSold ?? sold.length) * 30) / windowDays);
-  // BR-10: only a summary row with both counts is trustworthy; otherwise the speed is unknown.
-  const coverageComplete = summary?.soldPerDay != null && summary?.totalActive != null;
-  return { platform: "ebay", sold, soldLast30d, activeListings: summary?.totalActive ?? 0, coverageComplete };
+  // BR-10 fail-closed: this actor searches by keyword (not item attributes), caps listings, and
+  // gives a 90-day average rather than an exact trailing-30-day count, so the counts are never
+  // comparable/complete for the BR-10 window. Speed stays unknown until a sourced contract says otherwise.
+  return { platform: "ebay", sold, soldLast30d, activeListings: summary?.totalActive ?? 0, coverageComplete: false };
 }
 
 /** Live fetch for one search query. Callers go through the price index (price-index.ts). */

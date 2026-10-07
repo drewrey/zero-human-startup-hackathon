@@ -56,6 +56,21 @@ function suite(name: string, makeStore: () => Promise<IndexStore>) {
       expect(r.asOf).toBe(NOW.toISOString());
     });
 
+    it("BR-10: legacy cached eBay entries with coverageComplete=true read back as incomplete", async () => {
+      const store = await makeStore();
+      await store.put({
+        key: "patagonia synchilla mens l", query: "Patagonia Synchilla mens L",
+        listings: { ...listings(10), coverageComplete: true }, fetchedAt: NOW.toISOString(), costUsd: 0.16,
+      });
+      const { fetcher } = fakeFetcher();
+      const fresh = await lookup(store, fetcher, item, new Date(NOW.getTime() + DAY));
+      expect(fresh.from).toBe("index");
+      expect(fresh.listings.coverageComplete).toBe(false);
+      const stale = await lookup(store, fetcher, item, new Date(NOW.getTime() + (INDEX_TTL_DAYS + 1) * DAY));
+      expect(stale.from).toBe("stale-index");
+      expect(stale.listings.coverageComplete).toBe(false);
+    });
+
     it("refuses a live fetch past the daily budget", async () => {
       const store = await makeStore();
       await store.recordSpend(DAILY_BUDGET_USD, "earlier lookups");

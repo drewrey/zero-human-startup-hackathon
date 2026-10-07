@@ -67,6 +67,14 @@ export async function refresh(
   return entry;
 }
 
+/**
+ * BR-10 fail-closed: eBay entries cached before the correction may carry coverageComplete=true
+ * from keyword-level, capped, 90-day-averaged summaries. Never trust that flag on read.
+ */
+export function failClosedCoverage(listings: PlatformListings): PlatformListings {
+  return listings.platform === "ebay" ? { ...listings, coverageComplete: false } : listings;
+}
+
 export async function lookup(
   store: IndexStore,
   fetcher: LiveFetcher,
@@ -78,12 +86,12 @@ export async function lookup(
 
   if (entry) {
     const age = now.getTime() - Date.parse(entry.fetchedAt);
-    if (age <= INDEX_TTL_DAYS * DAY_MS) return { listings: entry.listings, asOf: entry.fetchedAt, from: "index" };
+    if (age <= INDEX_TTL_DAYS * DAY_MS) return { listings: failClosedCoverage(entry.listings), asOf: entry.fetchedAt, from: "index" };
     // Stale: answer now, refresh in the background if the budget allows.
     void refresh(store, fetcher, query, now).catch(() => {});
-    return { listings: entry.listings, asOf: entry.fetchedAt, from: "stale-index" };
+    return { listings: failClosedCoverage(entry.listings), asOf: entry.fetchedAt, from: "stale-index" };
   }
 
   const fresh = await refresh(store, fetcher, query, now);
-  return { listings: fresh.listings, asOf: fresh.fetchedAt, from: "live" };
+  return { listings: failClosedCoverage(fresh.listings), asOf: fresh.fetchedAt, from: "live" };
 }

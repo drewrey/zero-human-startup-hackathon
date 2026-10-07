@@ -7,6 +7,20 @@ rooms and threads, and the CEO agent drives the work.
 BAND has no credits, so **Kylon threads are the handoff channel**. Every handoff uses the format in
 `_shared-context.md`.
 
+## 0. What the founder does vs. what's scripted
+
+The `kylon` CLI can create agents, rooms, skills, and tables, so most of this is scripted from the repo.
+The founder only:
+
+1. Signs up at app.kylon.io and creates the workspace.
+2. Installs the CLI and signs in: `curl -fsSL https://api.kylon.io/install.sh | sh` (opens a browser).
+3. Approves the Forge connection (Claude Code on this computer) when prompted.
+4. Generates one agent API key (agent settings → API key) for the app's Kylon model proxy and puts
+   it in `web/.env.local` and the InstaCloud secrets as `ANTHROPIC_API_KEY`.
+
+Everything below (agents, role prompts as skills, rooms, tables, kickoff message) is then created
+with `kylon workspace ...` commands.
+
 ## 1. Workspace and rooms (founder, ~10 min)
 
 Create a workspace (working name: Flipwise) and these rooms:

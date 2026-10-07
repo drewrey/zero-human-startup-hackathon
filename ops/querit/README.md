@@ -24,5 +24,5 @@ you retrieved it if the result shows "date unknown"). No URL and date, no claim.
 ## Test
 
 ```bash
-node --test ops/querit/   # mocked response, no live calls
+node --test ops/querit/search.test.mjs   # mocked response, no live calls
 ```

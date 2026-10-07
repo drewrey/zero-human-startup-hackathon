@@ -48,3 +48,21 @@ test("API error codes surface", async () => {
   const f = async () => ({ ok: true, status: 200, json: async () => ({ error_code: 401, error_msg: "bad key" }) });
   await assert.rejects(search("q", 1, { apiKey: "k", fetchImpl: f }), /Querit error 401: bad key/);
 });
+
+test("live response shape: error_code 200 with empty error_msg is success", async () => {
+  const live = {
+    took: "737ms",
+    error_code: 200,
+    error_msg: "",
+    results: { result: [{ url: "https://example.com/str", page_age: "2026-09-16T14:53:45Z", title: "STR guide", snippet: "70%+ STR" }] },
+  };
+  const f = async () => ({ ok: true, status: 200, json: async () => live });
+  const items = await search("sell-through", 1, { apiKey: "k", fetchImpl: f });
+  assert.equal(items.length, 1);
+  assert.equal(items[0].url, "https://example.com/str");
+});
+
+test("error_code 200 with an error message is still an error", async () => {
+  const f = async () => ({ ok: true, status: 200, json: async () => ({ error_code: 200, error_msg: "quota" }) });
+  await assert.rejects(search("q", 1, { apiKey: "k", fetchImpl: f }), /Querit error 200: quota/);
+});

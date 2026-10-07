@@ -105,8 +105,11 @@ Voice-first. Photo is optional (and later powers listing drafts).
   - **NOT ENOUGH DATA:** fewer than 3 matched sold comps across all platforms; check this first.
   - **PASS:** `net_profit ≤ 0`; or net profit is positive but below `min_profit` AND known
     sell-through fails the speed threshold in BR-10.
-  - **BUY:** `net_profit ≥ min_profit` AND a known sell-through rate meets the BR-10 speed threshold.
-  - **MAYBE:** remaining positive-profit cases (one threshold fails, or speed is unknown).
+  - **BUY:** `net_profit ≥ min_profit` AND a known sell-through rate meets the BR-10 speed threshold
+    AND the recommended platform has `fee_estimate.status = "complete"` (BR-2). An incomplete
+    fee estimate cannot produce BUY, regardless of the estimated profit or speed signal.
+  - **MAYBE:** remaining positive-profit cases (one threshold fails, speed is unknown, or the
+    recommended platform's fee estimate is incomplete).
     Unknown speed cannot produce BUY or PASS solely for being unknown.
   - `min_profit` and `max_days` are per-user settings. Defaults: `min_profit = $10`,
     `max_days = 30` (to be checked with users). `max_days` is a desired sale window for a
@@ -118,8 +121,10 @@ Voice-first. Photo is optional (and later powers listing drafts).
   BUY/PASS: the highest whole-dollar tag price at which net profit still clears `min_profit` (and stays
   > $0). Spoken as "Worth it under $X." If known sell-through misses the BR-10 speed threshold,
   the verdict is MAYBE with the max price ("Slower market. Worth it under $X."). If speed is
-  unknown, say so and use MAYBE with the max price; never imply an individual sale time. If no
-  tag price would clear `min_profit`, the verdict is PASS ("Even free, only about $N profit").
+  unknown, say so and use MAYBE with the max price; never imply an individual sale time.
+  An incomplete fee estimate on the recommended platform also produces MAYBE with an estimated
+  max price and its assumptions, never BUY_UNDER (BR-2). If no tag price would clear
+  `min_profit`, the verdict is PASS ("Even free, only about $N profit").
 - **BR-13 Low confidence:** with 3–5 matched comps, the verdict shows a "low confidence" label and the
   spoken answer says so.
 
@@ -222,7 +227,7 @@ If only one platform is live, BR-8 still runs; it simply has one candidate.
   "verdict": "MAYBE",
   "confidence": "normal",
   "max_buy_price": null,
-  "spoken": "Maybe. eBay profit is an estimate; buyer shipping and tax are unknown. Recent demand meets your pace."
+  "spoken": "Maybe. eBay, about $30 estimated profit. Recent demand meets your pace. Buyer shipping and tax unknown."
 }
 ```
 

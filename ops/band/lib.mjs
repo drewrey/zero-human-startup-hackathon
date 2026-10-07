@@ -91,6 +91,16 @@ export async function nextMessage(agentName, config = loadConfig()) {
   return msg;
 }
 
+/** Every message waiting for this agent (not yet processed), oldest first, each marked "processing". */
+export async function claimAll(agentName, config = loadConfig()) {
+  const key = agentKey(agentName);
+  const roomId = config.room.id;
+  const res = await band("GET", `/agent/chats/${roomId}/messages`, { key });
+  const list = Array.isArray(res) ? res : (res?.messages ?? []);
+  for (const m of list) await band("POST", `/agent/chats/${roomId}/messages/${m.id}/processing`, { key });
+  return list;
+}
+
 export const markProcessed = (agentName, msgId, config = loadConfig()) =>
   band("POST", `/agent/chats/${config.room.id}/messages/${msgId}/processed`, { key: agentKey(agentName) });
 

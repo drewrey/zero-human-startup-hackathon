@@ -27,4 +27,16 @@ agent-work log) so judges can see evidence of the work it did.
 4. **Lead gen (Phase 2)**
    Growth defines ICP → Glasser/Apify discover resellers + creators → score → outreach drafts → human approves send.
 
-Per-agent role prompts: to be written in `agents/<role>.md`.
+## Role prompts
+
+Each agent's system prompt = `_shared-context.md` + its role file.
+
+| Agent | Prompt | Phase |
+|---|---|---|
+| CEO / Strategy ("Atlas") | `ceo-strategy.md` | 1 |
+| Market Research ("Scout") | `market-research.md` | 1 |
+| Product Manager ("Spec") | `product-manager.md` | 1 |
+| Pricing Data ("Comp") | `pricing-data.md` | 1 |
+| Engineer ("Forge") | `engineer.md` | 1 |
+| Growth & Sales, Finance, Customer Success | to be written | 2 |
+

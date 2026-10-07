@@ -7,6 +7,14 @@ rooms and threads, and the CEO agent drives the work.
 Kylon is the office; **BAND is the wire** between agents in different tools (Kylon agents, Forge in
 AdaL, the Rocket Ride pipeline). Every cross-tool handoff uses the format in `_shared-context.md`.
 
+## Status (Oct 7)
+
+Done: workspace **Circling Vultures** (`a3fae6244774`); agents Atlas, Scout, Spec, Comp created
+(ids in `kylon-agents.json`) with their role prompts installed as skills
+(`scripts/kylon-sync-skills.py`); rooms `#hq`, `#research`, `#product-eng`, `#pricing`; kickoff
+posted in `#hq`. Agents set up their own connections (founder approves the cards) and Atlas builds the
+Agent Log and Decisions database apps. Pending: Forge in AdaL, BAND room, Rocket Ride, Kylon API key.
+
 ## 0. What the founder does vs. what's scripted
 
 The `kylon` CLI can create agents, rooms, skills, and tables, so most of this is scripted from the repo.

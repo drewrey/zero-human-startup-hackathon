@@ -46,13 +46,14 @@ const listings = (platform: Platform, prices: number[], soldLast30d = 20, active
 
 const settings = (over: Partial<Settings> = {}): Settings => ({ ...DEFAULT_SETTINGS, ...over });
 
-const run = (over: { item?: Partial<ItemAttributes>; settings?: Partial<Settings>; listings?: PlatformListings[] } = {}) =>
+const LATER = new Date("2026-10-12T12:00:00Z");
+const run = (over: { now?: Date; item?: Partial<ItemAttributes>; settings?: Partial<Settings>; listings?: PlatformListings[] } = {}) =>
   priceCheck({
     item: item(over.item),
     assumptions: [],
     listings: over.listings ?? [listings("ebay", [40, 42, 45, 45, 48, 50, 52])],
     settings: settings(over.settings),
-    now: NOW,
+    now: over.now ?? NOW,
     dataSource: "demo",
     understoodBy: "heuristic",
   });
@@ -65,7 +66,7 @@ describe("BR-4 / BR-5 verdict", () => {
   });
 
   it("BR-5: BUY when profit passes and a known rate meets the target", () => {
-    expect(decideVerdict(20, "meets_target", settings())).toBe("BUY");
+    expect(decideVerdict(20, "meets_target", settings(), true)).toBe("BUY");
   });
 
   it("BR-5: MAYBE when exactly one threshold fails", () => {
@@ -89,8 +90,8 @@ describe("BR-4 / BR-5 verdict", () => {
 
   it("BR-5: changing max days changes the verdict without code changes", () => {
     const l = [listings("ebay", [40, 42, 45, 45, 48, 50, 52], 6, 12)];
-    expect(run({ listings: l, settings: { maxDays: 30 } }).verdict).toBe("MAYBE");
-    expect(run({ listings: l, settings: { maxDays: 60 } }).verdict).toBe("BUY");
+    expect(run({ now: LATER, listings: l, settings: { maxDays: 30 } }).verdict).toBe("MAYBE");
+    expect(run({ now: LATER, listings: l, settings: { maxDays: 60 } }).verdict).toBe("BUY");
   });
 
   it("BR-5: fewer than 3 matched comps is NOT_ENOUGH_DATA regardless of speed", () => {
@@ -100,9 +101,53 @@ describe("BR-4 / BR-5 verdict", () => {
   });
 
   it("BR-5: unknown speed on a profitable item is MAYBE end to end", () => {
-    const r = run({ listings: [listings("ebay", [40, 42, 45, 45, 48, 50, 52], 20, 20, false)] });
+    const r = run({ now: LATER, listings: [listings("ebay", [40, 42, 45, 45, 48, 50, 52], 20, 20, false)] });
     expect(r.verdict).toBe("MAYBE");
     expect(r.spoken).toContain("Speed unknown");
+  });
+});
+
+describe("BR-5 Phase 1 conservative verdict", () => {
+  const patagonia = () =>
+    run({ listings: [listings("ebay", [79.99, 79.99, 79.99], 1, 20, false)], item: { tagPrice: 9 } });
+
+  it("BR-5: Patagonia $79.99 median, $9 tag is BUY at about $57", () => {
+    const r = patagonia();
+    expect(r.verdict).toBe("BUY");
+    expect(r.platforms[0].netProfit).toBeCloseTo(57.26, 2);
+    expect(r.spoken).toContain("$57");
+  });
+
+  it("BR-5: fees are charged on price + assumed shipping + assumed tax", () => {
+    // 79.99 + 10 + 7.999 = 97.989 × 13.6% + 0.40
+    expect(patagonia().platforms[0].fees).toBeCloseTo(13.73, 2);
+  });
+
+  it("BR-5: speed never changes the verdict before 2026-10-11", () => {
+    const slow = run({ listings: [listings("ebay", [79.99, 79.99, 79.99], 3, 100)] });
+    const fast = run({ listings: [listings("ebay", [79.99, 79.99, 79.99], 90, 10)] });
+    expect(slow.verdict).toBe("BUY");
+    expect(fast.verdict).toBe("BUY");
+    expect(slow.spoken).toContain("Slower than your target");
+  });
+
+  it("BR-5: low positive profit is MAYBE, non-positive is PASS, regardless of speed", () => {
+    expect(decideVerdict(5, "below_target", settings(), false)).toBe("MAYBE");
+    expect(decideVerdict(5, "meets_target", settings(), false)).toBe("MAYBE");
+    expect(decideVerdict(0, "meets_target", settings(), false)).toBe("PASS");
+    expect(decideVerdict(10, "unknown", settings(), false)).toBe("BUY");
+  });
+
+  it("BR-5: result carries the ESTIMATE label with the assumptions, and no speed claim when unknown", () => {
+    const r = patagonia();
+    expect(r.assumptions.join(" ")).toMatch(/ESTIMATE.*\$10.*10%/);
+    expect(r.spoken).toContain("Speed unknown");
+    expect(r.spoken).not.toMatch(/days/);
+  });
+
+  it("BR-5: speed gates the verdict again from 2026-10-11", () => {
+    const l = [listings("ebay", [79.99, 79.99, 79.99], 3, 100)];
+    expect(run({ now: LATER, listings: l }).verdict).toBe("MAYBE");
   });
 });
 
@@ -175,13 +220,13 @@ describe("BR-10 sell speed", () => {
   });
 
   it("BR-7: known slow market says 'Slower market. Worth it under $X'", () => {
-    const r = run({ item: { tagPrice: null }, listings: [listings("ebay", [40, 42, 45, 45, 48], 6, 12)] });
+    const r = run({ now: LATER, item: { tagPrice: null }, listings: [listings("ebay", [40, 42, 45, 45, 48], 6, 12)] });
     expect(r.verdict).toBe("MAYBE");
     expect(r.spoken).toContain(`Slower market. Worth it under $${r.maxBuyPrice}`);
   });
 
   it("BR-7: no tag price with unknown speed is MAYBE with a max price", () => {
-    const r = run({ item: { tagPrice: null }, listings: [listings("ebay", [40, 42, 45, 45, 48], 1, 5)] });
+    const r = run({ now: LATER, item: { tagPrice: null }, listings: [listings("ebay", [40, 42, 45, 45, 48], 1, 5)] });
     expect(r.verdict).toBe("MAYBE");
     expect(r.maxBuyPrice).not.toBeNull();
     expect(r.spoken).toContain("Speed unknown");

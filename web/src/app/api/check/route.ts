@@ -4,6 +4,9 @@ import { priceCheck } from "@/lib/pricing/engine";
 import { PLATFORMS, type CheckRequest, type CheckResponse, type Settings } from "@/lib/types";
 import { understand } from "@/lib/understand";
 
+/** Live eBay lookups take ~20s; allow headroom. */
+export const maxDuration = 90;
+
 function sanitizeSettings(input: Partial<Settings> | undefined): Settings {
   const s = { ...DEFAULT_SETTINGS, ...input };
   return {
@@ -55,7 +58,10 @@ export async function POST(request: Request): Promise<Response> {
   } catch (error) {
     console.error("price check failed", error);
     return Response.json(
-      { kind: "error", message: "Something went wrong checking that item. Try again." } satisfies CheckResponse,
+      {
+        kind: "error",
+        message: "Couldn't get sold prices right now. Try again in a moment.",
+      } satisfies CheckResponse,
       { status: 500 },
     );
   }

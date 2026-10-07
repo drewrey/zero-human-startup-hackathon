@@ -56,10 +56,10 @@ export function CompsPanel({ result, onClose }: { result: PriceCheckResult; onCl
             ))}
             {showExcluded &&
               p.excluded.map((c) => (
-                <li key={c.url} className="flex justify-between gap-3 px-4 py-2.5 text-muted line-through decoration-1">
-                  <span className="truncate">{c.title}</span>
-                  <span className="shrink-0 no-underline">
-                    ${c.price} · {c.reason}
+                <li key={c.url} className="flex justify-between gap-3 px-4 py-2.5 text-muted">
+                  <span className="truncate line-through decoration-1">{c.title}</span>
+                  <span className="shrink-0">
+                    <span className="line-through decoration-1">${c.price}</span> · {c.reason}
                   </span>
                 </li>
               ))}

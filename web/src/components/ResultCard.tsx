@@ -98,6 +98,10 @@ export function ResultCard({
           </ul>
         )}
 
+        {result.dataSource === "live" && result.platforms.length <= 1 && (
+          <p className="text-xs text-muted">eBay sold listings, last 90 days. More marketplaces coming.</p>
+        )}
+
         <div className="flex flex-wrap gap-2 text-xs">
           {result.confidence === "low" && result.verdict !== "NOT_ENOUGH_DATA" && (
             <Badge className="bg-maybe-bg text-maybe">Low confidence</Badge>

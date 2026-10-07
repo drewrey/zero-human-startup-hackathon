@@ -152,6 +152,7 @@ describe("BR-11 / BR-12 comp selection", () => {
         comp(44, { size: "S" }),
         comp(44, { title: "North Face Denali Fleece" }),
         comp(44, { soldAt: "2026-01-01T00:00:00Z" }),
+        comp(44, { title: "Patagonia Synchilla Fleece Vest Mens L" }),
       ],
       NOW,
     );
@@ -161,8 +162,17 @@ describe("BR-11 / BR-12 comp selection", () => {
       "Size S",
       "Different brand",
       "Sold more than 90 days ago",
+      "Different item (vest)",
       "Unusually high price",
     ]);
+  });
+});
+
+describe("BR-11 item type", () => {
+  it("keeps comps whose title matches the item's own group", () => {
+    const pants = item({ type: "fleece pants", variant: null });
+    const { comps } = selectComps(pants, [comp(40, { title: "Patagonia Synchilla Pants Mens L" })], NOW);
+    expect(comps).toHaveLength(1);
   });
 });
 

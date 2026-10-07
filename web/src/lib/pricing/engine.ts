@@ -25,6 +25,37 @@ import { clamp, iqrBounds, median, quantile } from "./stats";
 const LOT_PATTERN = /\b(lot|bundle|bulk|set of \d+|\d+\s*(pc|pcs|piece|pieces))\b/i;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
+/**
+ * BR-11: garment groups that can't be the same item as each other. A comp whose title names a group
+ * the item doesn't belong to (a "vest" when we're pricing a pullover) is a different item.
+ * Tops are left out on purpose: jacket / pullover / hoodie overlap too much in real titles.
+ */
+const EXCLUSIVE_GROUPS = [
+  ["vest"],
+  ["pants", "trousers", "joggers"],
+  ["shorts"],
+  ["jeans"],
+  ["hat", "beanie", "cap"],
+  ["gloves", "mittens"],
+  ["socks"],
+  ["shoes", "sneakers"],
+  ["boots"],
+  ["dress"],
+  ["skirt"],
+  ["leggings", "tights"],
+  ["bag", "backpack", "purse", "tote"],
+].map((words) => new RegExp(`\\b(${words.join("|")})\\b`, "i"));
+
+function conflictingType(item: ItemAttributes, title: string): string | null {
+  if (!item.type) return null;
+  const itemText = `${item.type} ${item.variant ?? ""}`;
+  for (const group of EXCLUSIVE_GROUPS) {
+    const m = title.match(group);
+    if (m && !group.test(itemText)) return m[1].toLowerCase();
+  }
+  return null;
+}
+
 const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
 
 /** BR-11 + BR-12 + BR-1 window: decide which sold listings count as comps. */
@@ -43,6 +74,8 @@ export function selectComps(
       excluded.push({ ...comp, reason: `Sold more than ${COMP_WINDOW_DAYS} days ago` });
     } else if (item.brand && !norm(comp.title).includes(norm(item.brand))) {
       excluded.push({ ...comp, reason: "Different brand" });
+    } else if (conflictingType(item, comp.title)) {
+      excluded.push({ ...comp, reason: `Different item (${conflictingType(item, comp.title)})` });
     } else if (item.size && comp.size && norm(comp.size) !== norm(item.size)) {
       excluded.push({ ...comp, reason: `Size ${comp.size}` });
     } else if (item.gender && comp.gender && comp.gender !== item.gender && comp.gender !== "unisex") {

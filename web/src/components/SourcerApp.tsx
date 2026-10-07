@@ -24,7 +24,17 @@ export function SourcerApp() {
   const [error, setError] = useState<string | null>(null);
   const [panel, setPanel] = useState<Panel>(null);
   const [typed, setTyped] = useState("");
+  const [slow, setSlow] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!thinking) return;
+    const t = setTimeout(() => setSlow(true), 4000);
+    return () => {
+      clearTimeout(t);
+      setSlow(false);
+    };
+  }, [thinking]);
 
   useEffect(() => {
     // localStorage is only available after hydration.
@@ -201,7 +211,11 @@ export function SourcerApp() {
           </Bubble>
         ))}
         {speech.listening && <Bubble role="sourcer">{speech.interim || "Listening…"}</Bubble>}
-        {thinking && <Bubble role="assistant">Checking sold prices…</Bubble>}
+        {thinking && (
+          <Bubble role="assistant">
+            {slow ? "Still checking. Live searches take about 20 seconds…" : "Checking sold prices…"}
+          </Bubble>
+        )}
         {error && <p className="rounded-2xl bg-pass-bg px-4 py-3 text-sm text-pass">{error}</p>}
         {speech.error && <p className="rounded-2xl bg-pass-bg px-4 py-3 text-sm text-pass">{speech.error}</p>}
 

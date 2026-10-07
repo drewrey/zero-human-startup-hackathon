@@ -1,4 +1,5 @@
-import type { Condition, Gender, ItemAttributes, Turn } from "../types";
+import { parseGender, parseSize } from "../text";
+import type { Condition, ItemAttributes, Turn } from "../types";
 import type { Understanding } from "./schema";
 
 /**
@@ -55,9 +56,6 @@ const MODELS: [RegExp, string, string][] = [
   [/\b1460\b/, "1460", "boots"],
 ];
 
-const SIZE = /(?<![\w'’])(xxs|xs|s|m|l|xl|xxl|2xl|3xl|small|medium|large|x-large|extra large|\d{2}x\d{2}|size \d{1,2})(?![\w'’])/i;
-const SIZE_NORMAL: Record<string, string> = { small: "S", medium: "M", large: "L", "x-large": "XL", "extra large": "XL" };
-
 const NUMBER_WORDS: Record<string, number> = {
   one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10,
   eleven: 11, twelve: 12, thirteen: 13, fourteen: 14, fifteen: 15, sixteen: 16, seventeen: 17,
@@ -76,13 +74,6 @@ function parsePrice(text: string): number | null {
   return null;
 }
 
-function parseGender(text: string): Gender | null {
-  if (/\bwomen'?s?\b|\bladies\b/i.test(text)) return "women";
-  if (/\bmen'?s?\b/i.test(text)) return "men";
-  if (/\bkids?\b|\byouth\b/i.test(text)) return "kids";
-  return null;
-}
-
 function parseCondition(text: string): Condition | null {
   if (/\bnwt\b|new with tags/i.test(text)) return "new_with_tags";
   if (/\b(excellent|like new|mint)\b/i.test(text)) return "excellent";
@@ -93,8 +84,7 @@ function parseCondition(text: string): Condition | null {
 
 export function understandWithHeuristics(conversation: Turn[], followUpsAllowed: boolean): Understanding {
   const text = conversation.filter((t) => t.role === "sourcer").map((t) => t.text).join(". ");
-  const sizeMatch = text.match(SIZE);
-  const size = sizeMatch ? (SIZE_NORMAL[sizeMatch[1].toLowerCase()] ?? sizeMatch[1].toUpperCase()) : null;
+  const size = parseSize(text);
 
   const model = MODELS.map(([re, variant, type]) => {
     const m = text.match(re);

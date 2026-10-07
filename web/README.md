@@ -25,6 +25,8 @@ Copy `.env.example` to `.env.local`.
 | `ANTHROPIC_API_KEY` | Enables Claude for understanding speech. Without it, a simple keyword parser is used. |
 | `CLAUDE_MODEL` | Defaults to `claude-opus-5-5`. |
 | `UNDERSTAND_MODE` | `auto` (default), `claude`, or `heuristic`. |
+| `APIFY_TOKEN` | Enables live eBay sold comps. |
+| `COMPS_SOURCE` | Set to `demo` to force demo data even with a token (saves credits while working on UI). |
 
 ## What's real vs. placeholder
 
@@ -32,7 +34,7 @@ Copy `.env.example` to `.env.local`.
 |---|---|
 | Pricing, verdict, platform recommendation (`src/lib/pricing`) | Implemented and tested against SPEC |
 | Speech understanding (`src/lib/understand`) | Claude with structured output; keyword fallback |
-| Sold comps (`src/lib/comps`) | **Demo data only** (clearly labeled in the UI). Apify-backed live data is next |
+| Sold comps (`src/lib/comps`) | **Live eBay** sold listings via Apify when `APIFY_TOKEN` is set (~$0.16 and ~10–20s per uncached lookup, cached 24h in memory). Otherwise labeled demo data. Poshmark/Depop/Mercari not yet |
 | Fees (`src/lib/config.ts`) | **Unverified placeholders** until Market Research fills `docs/research/fees.md` |
 | Voice | Browser speech; Voiskey to replace it |
 | Haul + settings | Stored on the device (localStorage) |

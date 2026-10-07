@@ -1,0 +1,111 @@
+[
+ {
+  "_analytics": true,
+  "type": "sold-price-summary",
+  "searchQuery": "patagonia synchilla snap-t mens L",
+  "count": 12,
+  "medianPrice": 67.5,
+  "totalSold": 2062,
+  "soldPerDay": 22.91,
+  "windowDays": 90,
+  "soldListings": 30,
+  "totalActive": 3048,
+  "sellThroughRate": 0.4035
+ },
+ {
+  "searchQuery": "patagonia synchilla snap-t mens L",
+  "itemId": "287568272749",
+  "url": "https://www.ebay.com/itm/287568272749?_skw=patagonia+synchilla+snap-t+mens+L&hash=item42f4679d6d:g:Hd8AAeSw3JRpxc7U",
+  "title": "Patagonia Aztec Synchilla Snap-T Fleece Pullover Mens XXL Blue Tribal Geo Jacket",
+  "priceValue": 249.99,
+  "price": "$249.99",
+  "condition": "Pre-Owned",
+  "shippingCost": 9.99,
+  "sold": true,
+  "soldDate": "Sold  Oct 7, 2026"
+ },
+ {
+  "searchQuery": "patagonia synchilla snap-t mens L",
+  "itemId": "267755392721",
+  "url": "https://www.ebay.com/itm/267755392721?_skw=patagonia+synchilla+snap-t+mens+L&hash=item3e57770ed1:g:DCkAAeSwoTxqfOn9",
+  "title": "Patagonia Synchilla Snap T Hoodie Blue Grey Pullover Fleece Jacket Mens M A-15S1",
+  "priceValue": 59,
+  "price": "$59.00",
+  "condition": "Pre-Owned",
+  "shippingCost": 6.03,
+  "sold": true,
+  "soldDate": "Sold  Oct 7, 2026"
+ },
+ {
+  "searchQuery": "patagonia synchilla snap-t mens L",
+  "itemId": "206610143987",
+  "url": "https://www.ebay.com/itm/206610143987?_skw=patagonia+synchilla+snap-t+mens+L&hash=item301aec9af3:g:vg4AAeSwwRFqxopE",
+  "title": "Vintage 90s Patagonia Synchilla Snap-T Fleece Pullover Men's Medium Orange Blue",
+  "priceValue": 159,
+  "price": "$159.00",
+  "condition": "Pre-Owned",
+  "shippingCost": 9.28,
+  "sold": true,
+  "soldDate": "Sold  Oct 7, 2026"
+ },
+ {
+  "searchQuery": "patagonia synchilla snap-t mens L",
+  "itemId": "287432806534",
+  "url": "https://www.ebay.com/itm/287432806534?_skw=patagonia+synchilla+snap-t+mens+L&hash=item42ec549086:g:ET0AAeSwcIlqRgqA",
+  "title": "Patagonia Snap T Synchilla Fleece Hoody XL Made In Nicaragua Blue Red Oversized",
+  "priceValue": 124,
+  "price": "$124.00",
+  "condition": "Pre-Owned",
+  "shippingCost": 14.85,
+  "sold": true,
+  "soldDate": "Sold  Oct 7, 2026"
+ },
+ {
+  "searchQuery": "patagonia synchilla snap-t mens L",
+  "itemId": "307193655877",
+  "url": "https://www.ebay.com/itm/307193655877?_skw=patagonia+synchilla+snap-t+mens+L&hash=item47862b3245:g:FUIAAeSwO7BqswlK",
+  "title": "Patagonia Synchilla Pull Over Snap T Grey Sweatshirt Sweater Men\u2019s Size Large",
+  "priceValue": 55.99,
+  "price": "$55.99",
+  "condition": "Pre-Owned",
+  "shippingCost": 9.99,
+  "sold": true,
+  "soldDate": "Sold  Oct 7, 2026"
+ },
+ {
+  "searchQuery": "patagonia synchilla snap-t mens L",
+  "itemId": "960031747427",
+  "url": "https://www.ebay.com/itm/960031747427?_skw=patagonia+synchilla+snap-t+mens+L&hash=itemdf8659ed63:g:Wy4AAeSw0T5qxlkd",
+  "title": "Patagonia Jacket Mens Small Blue Synchilla Snap T Fleece Pullover Lightweight",
+  "priceValue": 59.99,
+  "price": "$59.99",
+  "condition": "Pre-Owned",
+  "shippingCost": 8.99,
+  "sold": true,
+  "soldDate": "Sold  Oct 7, 2026"
+ },
+ {
+  "searchQuery": "patagonia synchilla snap-t mens L",
+  "itemId": "227546169849",
+  "url": "https://www.ebay.com/itm/227546169849?_skw=patagonia+synchilla+snap-t+mens+L&hash=item34facf01f9:g:-0YAAeSwZ0hqvSo8",
+  "title": "Patagonia Men's Synchilla Snap-T Fleece Pullover XL",
+  "priceValue": 86,
+  "price": "$86.00",
+  "condition": "Brand New",
+  "shippingCost": 5.93,
+  "sold": true,
+  "soldDate": "Sold  Oct 7, 2026"
+ },
+ {
+  "searchQuery": "patagonia synchilla snap-t mens L",
+  "itemId": "117453121163",
+  "url": "https://www.ebay.com/itm/117453121163?_skw=patagonia+synchilla+snap-t+mens+L&hash=item1b58c0668b:g:Ey8AAeSwq-Jqxlu~",
+  "title": "Patagonia Synchilla Snap T Fleece Pullover Mens Large Gray 90s Made in USA",
+  "priceValue": 135,
+  "price": "$135.00",
+  "condition": "Pre-Owned",
+  "shippingCost": 7.03,
+  "sold": true,
+  "soldDate": "Sold  Oct 7, 2026"
+ }
+]

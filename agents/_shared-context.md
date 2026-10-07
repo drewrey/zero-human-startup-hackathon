@@ -28,9 +28,17 @@ spends money or contacts real people, and is the final decision-maker.
 
 If something you need isn't in these files, ask the owner. Don't invent it.
 
+## Tools you actually have
+
+Credits and fallbacks are tracked in `docs/PLAN.md` §6. In short: Kylon, InsForge on Instacloud,
+Apify, Prelint, Rocket Ride, Tenki, AdaL, and Glasser (only $10, ask the CEO before each use) are
+available. Voiskey, Querit, BAND, Paritok, and Finch are **not confirmed**. If your role mentions
+one of them, use the fallback listed in the plan and say so in your work log. Never spend credits
+beyond the budget guardrails in the plan.
+
 ## How we work together
 
-Send every handoff over BAND in this shape:
+Send every handoff over BAND (or Kylon task threads until BAND is available) in this shape:
 
 ```
 TO: <agent>    FROM: <agent>    TYPE: request | deliverable | blocker | decision

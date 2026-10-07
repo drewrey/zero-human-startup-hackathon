@@ -58,7 +58,7 @@ Phone (PWA, earbuds)
                     Store scans + comps (InsForge DB/storage) → becomes the pricing dataset
                     Phase 2: price index checked first (BR-18); nightly batch jobs refresh and grow it,
                     so live scraping is only needed for the long tail
-Deploy: Instacloud (confirm vs. InsForge with organizers)
+Deploy: InsForge on Instacloud (backend + hosting)
 Built by: AdaL (Engineer agent), reviewed in Tenki, checked against docs/SPEC.md by Prelint
 ```
 
@@ -76,23 +76,37 @@ Phase 1 must show **real workflows**, not standalone chatbots. Minimum demonstra
 `Market Research → (BAND) → PM writes SPEC → (BAND) → Engineer builds in AdaL → Prelint checks against SPEC`
 and `Pricing Data agent runs the comp pipeline the product calls`.
 
-## 6. Sponsor tool map
+## 6. Sponsor tools and credits
 
-| Tool | Use | Phase |
-|---|---|---|
-| Kylon | Hosts the agent team, roles, task ownership | 1 |
-| BAND | Agent-to-agent handoffs | 1 |
-| AdaL | Primary build/execution platform | 1 |
-| Apify | Sold/active listing data | 1 |
-| Querit | Market + competitor research, fee verification | 1 |
-| Prelint | Check code against `docs/SPEC.md` | 1 |
-| Rocket Ride | Price-check, feedback, and lead pipelines | 1–2 |
-| Voiskey | Voice input in-store; voice investor Q&A | 1–2 |
-| InsForge / Instacloud | Backend / deploy | 1 |
-| Glasser.ai | Reseller creator + lead discovery, competitor intel | 2 |
-| Tenki | Sandbox + PR review of agent-written code | 2 |
-| Paritok | Compress scraped comps + long research context | 2 |
-| Finch | Package "secondhand price check" as a reusable skill | 2 |
+Credits confirmed Oct 7. Tools without credits stay in the plan only if they turn out to have a free
+tier; until then each has a fallback.
+
+| Tool | Credits | Use | Owner | Phase |
+|---|---|---|---|---|
+| Kylon | $100 | Hosts the 5 agents, roles, task ownership; agent handoffs until BAND is available | CEO | 1 |
+| InsForge on Instacloud | Free tier | Backend (Postgres, auth, storage, functions) + hosting the app. Free tier includes $1 of model-gateway credit; free projects pause after a week idle | Engineer | 1 |
+| Apify | $100 | Sold and active listings for comps, and nightly index refreshes | Pricing Data | 1 |
+| Prelint | $250 (this repo) | Check code against `docs/SPEC.md` before each deploy | PM | 1 |
+| Rocket Ride | Cloud code | Price-check pipeline, nightly batch jobs, feedback pipeline | Pricing Data | 1–2 |
+| Tenki | $200 | Sandboxes, CI runners, PR review for agent-written code | Engineer | 1–2 |
+| AdaL | (no credit info) | Primary build/execution platform | Engineer | 1 |
+| Glasser.ai | $10 | A few targeted lookups only: reseller creators and communities for outreach | Growth | 2 |
+| Ask the W | 30-day trial | TBD: what it does is unclear | — | ? |
+| Voiskey | None found | Fallback: browser speech. Ask their booth about an API | Engineer | — |
+| Querit | None found | Fallback: Apify + model web search for research | Market Research | — |
+| BAND | None found | Fallback: Kylon task threads for handoffs. Worth asking: $500 cash prize | CEO | — |
+| Paritok | None found | Fallback: summarize long context ourselves | — | — |
+| Finch | None found | Check whether submitting a skill is free | Pricing Data | 2 |
+
+### Budget guardrails
+
+- **Apify ($100):** the largest real cost. Cache every query for 24h (index for 7 days per BR-19),
+  cap live fetches per day, and have Pricing Data report spend daily. If spend passes $50 before
+  Oct 10, the CEO decides what to cut.
+- **Glasser ($10):** roughly a handful of queries. Growth proposes each one; the CEO approves.
+- **Kylon ($100), Tenki ($200), Prelint ($250):** no cap expected this week; Finance tracks totals.
+- **Model calls:** not covered by any sponsor beyond InsForge's $1. See the open decision in
+  `docs/decisions.md`.
 
 ## 7. Phase 1 timeline (today)
 
@@ -121,7 +135,7 @@ and `Pricing Data agent runs the comp pipeline the product calls`.
 ## 10. Open questions
 
 - Team: solo or 2? Who owns what?
-- Instacloud vs. InsForge — which counts for the prize/requirement?
-- Sponsor access: which tools do we already have accounts/keys for?
+- Ask the W: what is it, and is it useful here?
+- Voiskey, Querit, BAND, Paritok, Finch: any free tier or hackathon access?
 - Do we have access to real resellers to test with this week?
 - Default thresholds ($10 min profit, 30 days) — validate with the first few users.

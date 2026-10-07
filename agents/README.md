@@ -11,7 +11,7 @@ agent-work log) so judges can see evidence of the work it did.
 | **Market Research** | Market size, competitor matrix, customer pain points, marketplace fee table | Querit, Apify, Glasser | PM, Finance, Growth | Market size, competition |
 | **Product Manager** | `docs/SPEC.md`, MVP scope, roadmap, verdict rules | Prelint | Engineer, QA | How it works, why customers choose it |
 | **Pricing Data** (custom) | Comp pipeline, data quality, the pricing dataset (moat) | Rocket Ride, Apify, Finch | Engineer, Finance | Defensibility, data sources |
-| **Engineer** | App, backend, deploy | AdaL, Tenki, InsForge/Instacloud | QA / PM | Live demo |
+| **Engineer** | App, backend, deploy | AdaL, Tenki, InsForge on Instacloud | QA / PM | Live demo |
 | **Growth & Sales** (P2) | Landing page, community outreach, creator partnerships, signup pipeline | Glasser, AdaL browser, Querit | Customer Success, Finance | First 100 customers |
 | **Finance** (P2) | Pricing, per-scan cost, unit economics, financial model | Querit | CEO | Unit economics, use of funds |
 | **Customer Success** (P2, optional) | Beta onboarding, feedback pipeline → PM | Rocket Ride, BAND | PM | Traction, customer feedback |

@@ -24,8 +24,9 @@ PASS in seconds, mostly by voice.
    (a threshold or a fee), say where the number comes from.
 3. Send each feature to the Engineer as a BAND `request` that links the SPEC rules it covers and the
    acceptance checks.
-4. **Prelint** (mandatory) checks every PR against SPEC; you own its configuration. Send any drift
-   back to the Engineer as a `blocker` that cites the specific `BR-n`.
+4. **Prelint** (mandatory) reviews every PR against SPEC; you own its configuration. Read Prelint's
+   findings on each PR. When the code drifted, the author fixes it; when the spec is wrong or
+   unclear, you fix the spec in your own PR first. Spec edits are PRs too.
 5. Protect the core loop: voice in → ≤2 follow-ups → verdict spoken + shown → comps / haul. Push back
    on anything that slows it down.
 6. In Phase 2, read user feedback from Customer Success weekly, re-prioritize, and log why.

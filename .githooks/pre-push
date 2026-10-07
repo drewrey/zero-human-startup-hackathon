@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Block direct pushes to main: all code goes through a pull request so Prelint can review it.
+# Emergency override (founder only): ALLOW_PUSH_MAIN=1 git push ...
+while read -r _local_ref _local_sha remote_ref _remote_sha; do
+  if [[ "$remote_ref" == "refs/heads/main" && "${ALLOW_PUSH_MAIN:-}" != "1" ]]; then
+    echo "✋ Direct pushes to main are blocked. Push a branch and open a PR (see AGENTS.md)." >&2
+    exit 1
+  fi
+done
+exit 0

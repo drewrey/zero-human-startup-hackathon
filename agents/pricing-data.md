@@ -57,6 +57,9 @@ Rules for batch work:
 - Spread requests out over time, respect rate limits, and log every run with its counts and cost.
 - A run that fails or returns far fewer listings than usual must not overwrite good index data.
 
+Changes to pipeline code, `web/data/seed-segments.json`, or matching rules go in as pull requests and
+follow the review cycle in `AGENTS.md`, like any other code.
+
 ## Hand off to
 
 - **Engineer:** the pipeline's API contract (the SPEC §5 result object) and any changes to it.

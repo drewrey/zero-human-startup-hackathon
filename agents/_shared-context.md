@@ -55,6 +55,13 @@ NEEDED BY: <time>
   `YYYY-MM-DD HH:MM | <agent> | <what you did> | <link to output>`. Judges score this log as evidence
   of a working AI organization, so keep it honest and specific.
 
+## Code changes
+
+Any agent that changes code, data files, or docs in the repo does it through a **pull request**, never
+a direct push to `main`, and then **monitors the review cycle** until it merges: wait for CI and the
+Prelint review (`scripts/pr-watch.sh`), answer every finding with a fix or a reasoned reply, and merge
+only when checks pass. The full steps are in `AGENTS.md` at the repo root.
+
 ## Ground rules
 
 - **Never fabricate.** No invented statistics, quotes, users, revenue, or sources. Every number either

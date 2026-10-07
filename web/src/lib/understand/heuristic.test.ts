@@ -55,11 +55,11 @@ describe("heuristic understanding", () => {
     ["ninety bucks", 90], ["sixty bucks", 60], ["seventy dollars", 70], ["eighty bucks", 80],
     ["a hundred bucks", 100], ["one hundred dollars", 100], ["one twenty bucks", 120],
     ["ninety-nine bucks", 99], ["one hundred and five bucks", 105], ["forty two bucks", 42],
-  ])("BR-1 parses spoken price %s", (phrase, price) => {
+  ])("BR-7 parses spoken price %s", (phrase, price) => {
     expect(understandWithHeuristics(say(`some fleece jacket ${phrase}`), true).item.tagPrice).toBe(price);
   });
 
-  it("BR-1 keeps ninety as the tag price for the Synchilla", () => {
+  it("BR-7 keeps ninety as the tag price for the Synchilla", () => {
     const { item } = understandWithHeuristics(say("Patagonia Synchilla, men's large, ninety bucks"), true);
     expect(item.tagPrice).toBe(90);
   });

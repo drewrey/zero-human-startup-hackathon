@@ -174,6 +174,12 @@ describe("BR-10 sell speed", () => {
     expect(sellSpeed(L(3, 3), settings()).signal).toBe("meets_target");
   });
 
+  it("BR-7: known slow market says 'Slower market. Worth it under $X'", () => {
+    const r = run({ item: { tagPrice: null }, listings: [listings("ebay", [40, 42, 45, 45, 48], 6, 12)] });
+    expect(r.verdict).toBe("MAYBE");
+    expect(r.spoken).toContain(`Slower market. Worth it under $${r.maxBuyPrice}`);
+  });
+
   it("BR-7: no tag price with unknown speed is MAYBE with a max price", () => {
     const r = run({ item: { tagPrice: null }, listings: [listings("ebay", [40, 42, 45, 45, 48], 1, 5)] });
     expect(r.verdict).toBe("MAYBE");

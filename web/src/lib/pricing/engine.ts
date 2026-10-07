@@ -254,7 +254,10 @@ export function priceCheck(input: PriceCheckInput): PriceCheckResult {
       reason = `Even free, only about $${net} profit on ${label}.`;
     } else {
       verdict = signal === "meets_target" ? "BUY_UNDER" : "MAYBE";
-      reason = `Worth it under $${max} on ${label}. ${speedText}.`;
+      reason =
+        signal === "below_target"
+          ? `Slower market. Worth it under $${max} on ${label}.`
+          : `Worth it under $${max} on ${label}. ${speedText}.`;
     }
     return finish({ ...base, recommendedPlatform: rec.platform, verdict, confidence, maxBuyPrice: max, reason });
   }

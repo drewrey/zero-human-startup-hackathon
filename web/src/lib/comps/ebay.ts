@@ -72,7 +72,9 @@ export function toPlatformListings(rows: Row[]): PlatformListings {
   const soldLast30d = summary?.soldPerDay != null
     ? Math.round(summary.soldPerDay * 30)
     : Math.round(((summary?.totalSold ?? sold.length) * 30) / windowDays);
-  return { platform: "ebay", sold, soldLast30d, activeListings: summary?.totalActive ?? 0 };
+  // BR-10: only a summary row with both counts is trustworthy; otherwise the speed is unknown.
+  const coverageComplete = summary?.soldPerDay != null && summary?.totalActive != null;
+  return { platform: "ebay", sold, soldLast30d, activeListings: summary?.totalActive ?? 0, coverageComplete };
 }
 
 /** Live fetch for one search query. Callers go through the price index (price-index.ts). */

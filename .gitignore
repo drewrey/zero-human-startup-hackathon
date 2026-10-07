@@ -11,3 +11,9 @@ build/
 __pycache__/
 .venv/
 ~$*.docx
+
+# BAND relay state
+ops/band/.relay-state.json
+
+# Forge (AdaL) run logs
+ops/forge/logs/

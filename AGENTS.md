@@ -30,6 +30,18 @@ once per checkout.)
 Never force-push to `main`, merge your own PR with failing checks, or resolve a reviewer's comment
 without replying to it.
 
+## BAND (cross-system handoffs)
+
+If you are Forge (AdaL) or another agent running on this computer, your requests from the Kylon team
+arrive over BAND. Check at the start of every session and after every PR:
+
+```bash
+npm run band -- inbox Forge          # read new requests (marks them handled)
+npm run band -- send Forge "@Spec <reply with PR link and BR-n rules>"
+```
+
+Reply to every request: accept, push back with a reason, or report it blocked. See `ops/band/README.md`.
+
 ## Repo conventions
 
 - Business rules live in pure functions under `web/src/lib/pricing`, with tests named by `BR-n`.

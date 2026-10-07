@@ -32,7 +32,18 @@ export const FEES: Record<Platform, FeeRule> = {
     verified: false,
   },
   depop: { percent: 0.033, fixed: 0.45, sellerShipping: 0, source: null, asOf: null, verified: false },
-  mercari: { percent: 0.1, fixed: 0.5, sellerShipping: 0, source: null, asOf: null, verified: false },
+  // Verified 2026-10-07: 10% seller fee, no separate fixed/processing charge (fee schedule effective
+  // 2025-01-06). Base is item price + buyer-paid shipping; the engine currently passes item price only,
+  // so results are an item-only ESTIMATE (see PR #4 for the fee-base contract). The Oct 19, 2026 rate
+  // table is future and must not be used for the Oct 7 demo.
+  mercari: {
+    percent: 0.1,
+    fixed: 0,
+    sellerShipping: 0,
+    source: "https://www.mercari.com/us/help_center/article/169/",
+    asOf: "2026-10-07",
+    verified: true,
+  },
 };
 
 export function platformFee(rule: FeeRule, price: number): number {
@@ -60,5 +71,13 @@ export const MAX_FOLLOW_UPS = 2;
 /** BR-1: comp lookback window. */
 export const COMP_WINDOW_DAYS = 90;
 
-/** BR-10 clamp bounds. */
-export const DAYS_TO_SELL_BOUNDS = { min: 1, max: 180 };
+/** BR-10: sold-listing lookback and the minimum sales needed for a trustworthy rate. */
+export const SPEED_LOOKBACK_DAYS = 30;
+export const MIN_SPEED_SALES = 3;
+
+/** BR-10 / BR-14: plain-language signal text shared by the card and speech. */
+export const SPEED_SIGNAL_TEXT = {
+  meets_target: "Recent demand meets your pace",
+  below_target: "Slower than your target",
+  unknown: "Speed unknown",
+} as const;

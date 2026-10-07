@@ -33,6 +33,28 @@ const TYPES = [
   "blouse", "boots", "sneakers", "shoes", "bag", "purse",
 ];
 
+/** Well-known model names imply the item type, so we don't need to ask for it. */
+const MODELS: [RegExp, string, string][] = [
+  [/\bsynchilla\b/i, "Synchilla", "fleece pullover"],
+  [/\bsnap[\s-]?t\b/i, "Snap-T", "fleece pullover"],
+  [/\bbetter sweater\b/i, "Better Sweater", "fleece jacket"],
+  [/\bretro[\s-]?x\b/i, "Retro-X", "fleece jacket"],
+  [/\bnano puff\b/i, "Nano Puff", "puffer jacket"],
+  [/\bdown sweater\b/i, "Down Sweater", "puffer jacket"],
+  [/\bbaggies\b/i, "Baggies", "shorts"],
+  [/\bnuptse\b/i, "Nuptse", "puffer jacket"],
+  [/\bdenali\b/i, "Denali", "fleece jacket"],
+  [/\bthermoball\b/i, "ThermoBall", "puffer jacket"],
+  [/\b(atom lt|beta ar|alpha sv)\b/i, "$1", "jacket"],
+  [/\b50[15]\b/, "$&", "jeans"],
+  [/\b(align|wunder under)\b/i, "$1", "leggings"],
+  [/\bdefine jacket\b/i, "Define", "jacket"],
+  [/\bscuba\b/i, "Scuba", "hoodie"],
+  [/\b(detroit|chore) (jacket|coat)\b/i, "$1", "jacket"],
+  [/\b(air max|air force 1|dunk|jordan)\b/i, "$1", "sneakers"],
+  [/\b1460\b/, "1460", "boots"],
+];
+
 const SIZE = /(?<![\w'’])(xxs|xs|s|m|l|xl|xxl|2xl|3xl|small|medium|large|x-large|extra large|\d{2}x\d{2}|size \d{1,2})(?![\w'’])/i;
 const SIZE_NORMAL: Record<string, string> = { small: "S", medium: "M", large: "L", "x-large": "XL", "extra large": "XL" };
 
@@ -74,10 +96,15 @@ export function understandWithHeuristics(conversation: Turn[], followUpsAllowed:
   const sizeMatch = text.match(SIZE);
   const size = sizeMatch ? (SIZE_NORMAL[sizeMatch[1].toLowerCase()] ?? sizeMatch[1].toUpperCase()) : null;
 
+  const model = MODELS.map(([re, variant, type]) => {
+    const m = text.match(re);
+    return m ? { variant: m[0].replace(re, variant), type } : null;
+  }).find(Boolean);
+
   const item: ItemAttributes = {
     brand: BRANDS.find(([re]) => re.test(text))?.[1] ?? null,
-    type: TYPES.find((t) => new RegExp(`\\b${t}s?\\b`, "i").test(text)) ?? null,
-    variant: null,
+    type: TYPES.find((t) => new RegExp(`\\b${t}s?\\b`, "i").test(text)) ?? model?.type ?? null,
+    variant: model?.variant ?? null,
     size,
     gender: parseGender(text),
     condition: parseCondition(text),
@@ -86,10 +113,13 @@ export function understandWithHeuristics(conversation: Turn[], followUpsAllowed:
     tagPrice: parsePrice(text),
   };
 
-  const missing: string[] = [];
-  if (!item.brand) missing.push("What brand is it?");
-  if (!item.size) missing.push("What size?");
-  if (!item.type && missing.length < 2) missing.push("What kind of item?");
+  // Never repeat a question the sourcer has already been asked.
+  const asked = conversation.filter((t) => t.role === "assistant").map((t) => t.text).join(" ");
+  const missing = [
+    !item.brand && "What brand is it?",
+    !item.size && "What size?",
+    !item.type && "What kind of item?",
+  ].filter((q): q is string => Boolean(q) && !asked.includes(q as string));
 
   const assumptions: string[] = [];
   if (!item.condition) assumptions.push("condition: good");

@@ -16,6 +16,28 @@ describe("heuristic understanding", () => {
     expect(understandWithHeuristics(say("levis jeans $7.99"), true).item.tagPrice).toBe(7.99);
   });
 
+  it("understands the home-screen example, including curly quotes and model names", () => {
+    const { item, followUpQuestion } = understandWithHeuristics(say("“Patagonia Synchilla, men’s large, nine bucks”"), true);
+    expect(item).toMatchObject({
+      brand: "Patagonia",
+      variant: "Synchilla",
+      type: "fleece pullover",
+      size: "L",
+      gender: "men",
+      tagPrice: 9,
+    });
+    expect(followUpQuestion).toBeNull();
+  });
+
+  it("never asks the same question twice", () => {
+    const conversation = [
+      { role: "sourcer" as const, text: "Patagonia thing, large" },
+      { role: "assistant" as const, text: "What kind of item?" },
+      { role: "sourcer" as const, text: "the retro one" },
+    ];
+    expect(understandWithHeuristics(conversation, true).followUpQuestion).toBeNull();
+  });
+
   it("does not read the s in men's as a size", () => {
     expect(understandWithHeuristics(say("Patagonia men's fleece"), true).item.size).toBeNull();
   });

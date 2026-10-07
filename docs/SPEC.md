@@ -22,11 +22,11 @@ Voice-first. Photo is optional (and later powers listing drafts).
 🎤  "Patagonia Synchilla, nine bucks"
 🔊  "Snap-T or quarter-zip? And what size?"          ← ≤ 2 follow-ups, only price-relevant
 🎤  "Snap-T, large"
-🔊  "Buy it. Best on eBay, about 32 profit. Recent demand meets your pace."
+🔊  "Buy it. Best on eBay, about 32 profit. Recent demand meets the sourcing threshold."
 📱  ┌──────────────────────────────┐
     │ ✅ BUY        +$32 on eBay ⭐ │
     │ Sold $38–$52 · median $45    │
-    │ 24 comps · 150% sold/active  │
+    │ 24 comps · 40% sell-through  │
     │ eBay $32 · Posh $29 · Depop $28
     │ [why? → comps]  [+ haul]     │
     └──────────────────────────────┘
@@ -50,7 +50,7 @@ Voice-first. Photo is optional (and later powers listing drafts).
 | Screen | Contents |
 |---|---|
 | Capture | Big mic button, live transcript, optional camera button, settings gear |
-| Result card | Verdict (BUY / MAYBE / PASS / NOT ENOUGH DATA), best platform + net profit, sold range + median, comp count, 30-day sold/active rate and speed signal (or speed unknown), per-platform net row, assumptions made, buttons: why?, + haul, new item |
+| Result card | Verdict (BUY / MAYBE / PASS / NOT ENOUGH DATA), best platform + net profit, sold range + median, comp count, 90-day sold/(sold+active) share and demand signal (or speed unknown), per-platform net row, assumptions made, buttons: why?, + haul, new item |
 | Comps | Sold listings used: platform, title, sold price, sold date, link; excluded listings hidden behind a toggle |
 | Haul | Today's items: name, tag price, expected net, best platform; trip totals (spent, expected revenue, expected profit) |
 | Settings | Home platform, min profit per item, desired sale window (`max_days`), sales tax rate |
@@ -79,8 +79,10 @@ Voice-first. Photo is optional (and later powers listing drafts).
   - **MAYBE:** remaining positive-profit cases (one threshold fails, or speed is unknown).
     Unknown speed cannot produce BUY or PASS solely for being unknown.
   - `min_profit` and `max_days` are per-user settings. Defaults: `min_profit = $10`,
-    `max_days = 30` (to be checked with users). `max_days` is a desired sale window for a
-    market-level demand threshold, **not** a per-listing time-to-sale prediction.
+    `max_days = 30` (to be checked with users). For v0, `max_days` records the user's
+    desired sale window but **does not alter** the sourced, fixed 90-day demand threshold
+    in BR-10; converting a 90-day listing share to a personal sale-date probability is
+    unsupported. Do not claim a purchase will sell within the user's window.
 - **BR-6 Follow-up questions:** at most 2 per item. Only ask about attributes that change price
   (model/variant, size, gender, condition, era). Otherwise proceed and state assumptions on the card
   ("Assumed: men's, good condition").
@@ -105,23 +107,33 @@ Voice-first. Photo is optional (and later powers listing drafts).
 ### Sell speed
 
 - **BR-10 Sell speed (v0 market signal):** per platform, count comparable sold listings in
-  the trailing 30 days and comparable active listings at lookup time, using the same item
-  attributes/filters (BR-11), marketplace and de-duplication rules. When both searches have
-  complete, trustworthy coverage, `sold_last_30d >= 3` and `active_listings > 0`, set
-  `sell_through = sold_last_30d / active_listings` (the reseller **sold/active** convention;
-  it may exceed 100%). Otherwise `sell_through = null` and `speed_signal = "unknown"`;
-  do not replace a zero active count with one or treat an incomplete/capped result as a count.
-  For a known rate, `speed_threshold = 30 / max_days`. A rate at least the threshold is
-  `"meets_target"`, otherwise `"below_target"`. Speak/show “Recent demand meets your pace”
-  for the first or “Slower than your target” for the second, not a universal “fast” label;
-  show “Speed unknown” when neither count is trustworthy. This is a heuristic market-demand
-  comparison for the user's desired sale window, **not** a probability or a prediction
-  that this specific listing will sell within that many days. Show the lookback, numerator,
-  denominator, rate (rounded for display only) and plain-language signal on the card;
-  speech names the signal, never “sells in N days.” Use the unrounded rate for the verdict.
-  Sold-in-30-days and today's active snapshot are different windows, so seasonality,
-  listing price and matching quality can distort the signal. Recalibrate against our own
-  outcome data later. Method/caveats: [sold/active conventions and data limitations](https://flowlister.com/tools/sell-through-rate-calculator/) (checked 2026-10-07).
+  the trailing 90 days and comparable active listings at lookup time using the same item
+  attributes/filters (BR-11), marketplace, location, condition and de-duplication rules.
+  When the two counts are complete and trustworthy, `sold_last_90d >= 3`, and
+  `active_listings > 0`, set `sell_through = sold_last_90d / (sold_last_90d + active_listings)`.
+  This is the bounded **share of observed sold and currently active listings**, not the
+  separate `sold / active` reseller convention; label the formula and 90-day window on
+  the card. It must not exceed 100%. When any count is missing, zero-active, capped,
+  partial, keyword-only without BR-11 comparable filtering, or borrowed from a different
+  window (including `soldPerDay × 90` unless the provider verifies its denominator and
+  coverage), set `sell_through = null` and `speed_signal = "unknown"`. A present summary
+  row is not proof of comparable coverage.
+  **Proposed eBay apparel v0 BUY threshold for founder review:** `sell_through >= 0.20`
+  (unrounded). The [resale sourcing guide](https://www.liquidationoh.com/ebay-sell-through-rate-how-to-check-demand-before-you-buy/)
+  (checked 2026-10-07) computes 90-day `sold / (sold + active)` on the same item search and
+  calls 20–50% normal for used clothing, with a buy conditional on profit; this 20% lower
+  bound is an independent seller's rule of thumb, **not** an eBay or measured Flipwise
+  benchmark. Other platforms require their own validated threshold before BUY from speed.
+  If this threshold is not approved, use `"unknown"` for the BUY speed gate. A known rate
+  at or above the approved threshold is `"meets_target"`; a lower rate is
+  `"below_target"`. Speak/show “Recent demand meets the sourcing threshold,” “Below
+  sourcing threshold,” or “Speed unknown,” respectively. Show 90-day lookback, sold count,
+  active count, rate rounded only for display, and the signal on the card; compare the
+  unrounded rate for the verdict. This is a directional market-demand signal, never an
+  individual sale-date prediction, and does not certify the user's `max_days` goal.
+  Sold within 90 days and today's active snapshot are different windows, so seasonality,
+  listing price, condition and matching quality can distort the result. Do not manufacture
+  a BUY by changing the window or relaxing comparability.
 
 ### Comps
 
@@ -182,31 +194,36 @@ If only one platform is live, BR-8 still runs; it simply has one candidate.
   "platforms": [
     { "platform": "ebay", "comps_used": 24, "median": 45, "p25": 38, "p75": 52,
       "fees": 6.0, "shipping": 0, "net_profit": 32.0,
-      "speed": { "sold_last_30d": 18, "active_listings": 12, "sell_through": 1.5,
+      "speed": { "sold_last_90d": 8, "active_listings": 12, "sell_through": 0.4,
                  "signal": "meets_target", "as_of": "2026-10-07" } }
   ],
   "recommended_platform": "ebay",
   "verdict": "BUY",
   "confidence": "normal",
   "max_buy_price": null,
-  "spoken": "Buy it. Best on eBay, about 32 profit. Recent demand meets your pace."
+  "spoken": "Buy it. Best on eBay, about 32 profit. Recent demand meets the sourcing threshold."
 }
 ```
 
 ## 6. Acceptance checks (for Prelint / QA)
 
 - A result with negative net profit on the recommended platform is never BUY (BR-4).
-- Changing `min_profit` or `max_days` changes the next verdict without code changes;
-  at `max_days = 30`, 12 sold / 12 active meets the speed threshold, while 6 / 12 does not
-  (assuming complete coverage). At `max_days = 60`, 6 / 12 meets it (BR-5, BR-10).
+- Changing `min_profit` changes the next verdict without code changes. Changing
+  `max_days` does not secretly alter the 90-day sourcing threshold; the card does not
+  claim a per-item sale time or probability (BR-5, BR-10).
+- With complete comparable 90-day counts, 20 sold / (20 sold + 80 active) meets the
+  proposed 20% eBay threshold, while 19 / (19 + 81) does not. Display a bounded
+  percentage without converting it to `sold / active` or 30-day speed (BR-10).
 - No tag price → card shows "Worth it under $X", no BUY/PASS (BR-7).
 - Never more than 2 follow-up questions per item (BR-6).
 - Fewer than 3 matched sold comps across platforms → NOT ENOUGH DATA regardless of speed (BR-5).
-- Fewer than 3 matching sales in the 30-day speed window, zero active listings, or incomplete
-  sold/active coverage → speed unknown. Positive-profit cases become MAYBE, never BUY solely
-  from a missing speed count; negative or zero profit remains PASS (BR-4, BR-5, BR-10).
-- When a trustworthy rate exceeds 100%, show its sold/active percentage without capping it;
-  no card, speech or result object implies a specific number of days to sell (BR-10, BR-14).
+- Fewer than 3 comparable sales in 90 days, zero active, unknown or capped counts,
+  summary-only keyword counts containing different sizes, or an inferred 30-day count
+  from a 90-day average → speed unknown. A positive-profit case cannot become BUY solely
+  on such a count; nonpositive profit still gives PASS (BR-4, BR-5, BR-10).
+- A known rate is within [0%, 100%]; the result, card and speech never imply a specific
+  number of days to sell. The card shows the 90-day numerator and active denominator
+  alongside the benchmark signal; speech and card agree (BR-10, BR-14, BR-15).
 - Spoken numbers equal card numbers (BR-14, BR-15).
 - Home platform is recommended when it is within the bias threshold of the best platform (BR-8).
 - Fee values come from config with a source and as-of date (BR-3).

@@ -62,11 +62,31 @@ Voice-first. Photo is optional (and later powers listing drafts).
 - **BR-1 Expected sale price** for a platform = median sold price of matched comps on that platform
   in the last 90 days, after outlier removal (BR-12).
 - **BR-2 Net profit** for a platform =
-  `expected_sale_price − platform_fees(expected_sale_price) − seller_shipping_cost − purchase_cost`,
-  where `purchase_cost = tag_price × (1 + sales_tax_rate)`.
-- **BR-3 Platform fees and seller shipping costs** live in a config table (platform, fee formula,
-  shipping assumption for apparel, source URL, as-of date). They are never hardcoded inside
-  business logic. Values: **TBD (Research)**.
+  `expected_sale_price + seller_received_shipping − platform_fees(fee_inputs, fee_rule) − seller_shipping_cost − purchase_cost`,
+  where `purchase_cost = tag_price × (1 + sales_tax_rate)`. The fee inputs are the expected item
+  price, buyer shipping charge (even when a platform collects it for a label), applicable buyer sales
+  tax, and any other charge included by that platform's rule. Buyer sales tax is a fee-base input,
+  **not** seller revenue. `seller_received_shipping` is only a shipping payment that actually reaches
+  the seller; it is zero for a platform-managed buyer-paid label. `seller_shipping_cost` is actual
+  postage/label cost or seller-funded shipping discount/upgrade, not the buyer's shipping charge.
+  Count a buyer-paid shipping amount in revenue only when the seller receives it, and count its
+  actual postage cost separately. For a buyer-pays-label baseline, seller shipping cost is zero,
+  but any buyer shipping charge still enters a fee base when the platform requires it.
+  If a required fee-base or shipping input is unavailable, use an explicit item-price-only scenario,
+  display **ESTIMATE: item-only fee base, buyer-paid shipping, no seller discount** on the result,
+  retain the missing-input assumption in the result object, and do not output BUY from that
+  incomplete profit estimate. This temporary scenario is not a substitute for collecting the inputs.
+- **BR-3 Platform fees and seller shipping costs** live in a versioned config table with platform,
+  effective date, fee formula and its base (item price, buyer shipping, applicable buyer tax and
+  other applicable amounts), fixed-fee thresholds/exceptions, shipping mode, seller-funded
+  discount/label assumption, source URL and as-of date. They are never hardcoded in verdict logic.
+  Use the rate effective on the scan date, not a future published schedule. For an ordinary US
+  apparel order, the buyer-pays-shipping baseline has zero seller-paid postage, **not** zero postage
+  in the order or necessarily zero shipping in the fee base. The current verified branches and
+  exceptions are in [US apparel marketplace fees](research/fees.md) (checked 2026-10-07):
+  [eBay fee base](https://www.ebay.com/help/selling/fees-credits-invoices/selling-fees?id=4822),
+  [Depop processing base](https://depophelp.zendesk.com/hc/en-gb/articles/360001791127-Seller-fees-and-charges),
+  [Mercari fee base](https://www.mercari.com/us/help_center/article/169/).
 
 ### Verdict
 
@@ -181,4 +201,11 @@ If only one platform is live, BR-8 still runs; it simply has one candidate.
 - Fewer than 3 comps → NOT ENOUGH DATA (BR-5).
 - Spoken numbers equal card numbers (BR-14, BR-15).
 - Home platform is recommended when it is within the bias threshold of the best platform (BR-8).
-- Fee values come from config with a source and as-of date (BR-3).
+- Fee values come from effective-dated config with a source and as-of date; a future rate is not used early (BR-3).
+- A buyer-paid shipping charge enters the eBay, Depop, and Mercari fee bases when their configured
+  rules require it, even when seller-paid postage is $0; buyer sales tax enters the eBay and Depop
+  bases when applicable and never becomes seller revenue (BR-2, BR-3).
+- A seller-funded shipping discount/label reduces profit; seller-collected shipping is added to
+  revenue exactly once and actual seller-paid postage is deducted exactly once (BR-2).
+- Missing required shipping/tax inputs show the item-only estimate and its assumption on the card;
+  the verdict is not BUY from that estimate (BR-2, BR-4).

@@ -46,6 +46,15 @@ export const FEES: Record<Platform, FeeRule> = {
   },
 };
 
+/**
+ * BR-5 / BR-2 (Phase 1): conservative fee base = item price + ASSUMED buyer-paid shipping + ASSUMED
+ * sales tax. These are assumptions, not data; the card labels the profit an ESTIMATE.
+ */
+export const FEE_BASE_ASSUMPTIONS = { buyerShipping: 10, salesTaxRate: 0.1 };
+
+/** BR-5: before this date speed is information only and never changes the verdict. */
+export const SPEED_GATES_VERDICT_FROM = "2026-10-11";
+
 export function platformFee(rule: FeeRule, price: number): number {
   if (rule.flatBelow && price < rule.flatBelow.threshold) return rule.flatBelow.flat;
   return price * rule.percent + rule.fixed;

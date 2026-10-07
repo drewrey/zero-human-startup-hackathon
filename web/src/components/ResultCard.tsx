@@ -1,6 +1,7 @@
 "use client";
 
-import { PLATFORM_LABELS, type PriceCheckResult, type Verdict } from "@/lib/types";
+import { SPEED_SIGNAL_TEXT } from "@/lib/config";
+import { PLATFORM_LABELS, type PriceCheckResult, type SellSpeed, type Verdict } from "@/lib/types";
 
 const VERDICT_STYLE: Record<Verdict, { label: string; className: string }> = {
   BUY: { label: "BUY", className: "bg-buy-bg text-buy" },
@@ -62,12 +63,13 @@ export function ResultCard({
         <p className="text-base leading-snug">{result.reason}</p>
 
         {rec && (
-          <dl className="grid grid-cols-3 gap-2 text-center">
+          <dl className="grid grid-cols-2 gap-2 text-center">
             <Stat label="Sold range" value={`${money(rec.p25)}–${money(rec.p75)}`} />
             <Stat label="Comps" value={`${rec.compsUsed}`} />
-            <Stat label="Sells in" value={`~${rec.estDaysToSell}d`} />
           </dl>
         )}
+
+        {rec && <SpeedLine speed={rec.speed} />}
 
         {rec && (
           <p className="text-sm text-muted">
@@ -148,4 +150,21 @@ function Stat({ label, value }: { label: string; value: string }) {
 
 function Badge({ className, children }: { className: string; children: React.ReactNode }) {
   return <span className={`rounded-full px-2.5 py-1 font-medium ${className}`}>{children}</span>;
+}
+
+/** BR-10 / BR-14: lookback, numerator, denominator, rate and signal; never a days prediction. */
+function SpeedLine({ speed }: { speed: SellSpeed }) {
+  const known = speed.sellThrough != null;
+  return (
+    <p className="text-sm">
+      <span className="font-medium">{SPEED_SIGNAL_TEXT[speed.signal]}</span>
+      {known && (
+        <span className="text-muted">
+          {" "}
+          · {speed.soldLast30d} sold in {speed.lookbackDays} days / {speed.activeListings} active ={" "}
+          {Math.round(speed.sellThrough! * 100)}% sold/active
+        </span>
+      )}
+    </p>
+  );
 }

@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_SETTINGS } from "../config";
+import { DEFAULT_SETTINGS, SPEED_SIGNAL_TEXT } from "../config";
 import type { Comp, ItemAttributes, Platform, PlatformListings, Settings } from "../types";
 import {
   decideVerdict,
-  estimateDaysToSell,
   maxBuyPrice,
   priceCheck,
   recommendPlatform,
+  sellSpeed,
   selectComps,
 } from "./engine";
 
@@ -36,11 +36,12 @@ const comp = (price: number, over: Partial<Comp> = {}): Comp => ({
   ...over,
 });
 
-const listings = (platform: Platform, prices: number[], soldLast30d = 20, activeListings = 20): PlatformListings => ({
+const listings = (platform: Platform, prices: number[], soldLast30d = 20, activeListings = 20, coverageComplete = true): PlatformListings => ({
   platform,
   sold: prices.map((p) => comp(p, { platform })),
   soldLast30d,
   activeListings,
+  coverageComplete,
 });
 
 const settings = (over: Partial<Settings> = {}): Settings => ({ ...DEFAULT_SETTINGS, ...over });
@@ -58,21 +59,27 @@ const run = (over: { item?: Partial<ItemAttributes>; settings?: Partial<Settings
 
 describe("BR-4 / BR-5 verdict", () => {
   it("BR-4: never BUY when net profit is <= 0, even with min profit 0", () => {
-    expect(decideVerdict(0, 5, settings({ minProfit: 0 }))).toBe("PASS");
-    expect(decideVerdict(-3, 5, settings({ minProfit: 0 }))).toBe("PASS");
+    expect(decideVerdict(0, "meets_target", settings({ minProfit: 0 }))).toBe("PASS");
+    expect(decideVerdict(-3, "meets_target", settings({ minProfit: 0 }))).toBe("PASS");
+    expect(decideVerdict(-3, "unknown", settings({ minProfit: 0 }))).toBe("PASS");
   });
 
-  it("BR-5: BUY when profit and speed both pass", () => {
-    expect(decideVerdict(20, 10, settings())).toBe("BUY");
+  it("BR-5: BUY when profit passes and a known rate meets the target", () => {
+    expect(decideVerdict(20, "meets_target", settings())).toBe("BUY");
   });
 
   it("BR-5: MAYBE when exactly one threshold fails", () => {
-    expect(decideVerdict(5, 10, settings())).toBe("MAYBE");
-    expect(decideVerdict(20, 90, settings())).toBe("MAYBE");
+    expect(decideVerdict(5, "meets_target", settings())).toBe("MAYBE");
+    expect(decideVerdict(20, "below_target", settings())).toBe("MAYBE");
   });
 
-  it("BR-5: PASS when both thresholds fail", () => {
-    expect(decideVerdict(5, 90, settings())).toBe("PASS");
+  it("BR-5: PASS when low profit and a known slow rate", () => {
+    expect(decideVerdict(5, "below_target", settings())).toBe("PASS");
+  });
+
+  it("BR-5: unknown speed with positive profit is MAYBE, never BUY or PASS", () => {
+    expect(decideVerdict(20, "unknown", settings())).toBe("MAYBE");
+    expect(decideVerdict(5, "unknown", settings())).toBe("MAYBE");
   });
 
   it("BR-5: changing min profit in settings changes the verdict", () => {
@@ -80,10 +87,22 @@ describe("BR-4 / BR-5 verdict", () => {
     expect(run({ settings: { minProfit: 100 } }).verdict).toBe("MAYBE");
   });
 
-  it("BR-5: fewer than 3 matched comps is NOT_ENOUGH_DATA", () => {
+  it("BR-5: changing max days changes the verdict without code changes", () => {
+    const l = [listings("ebay", [40, 42, 45, 45, 48, 50, 52], 6, 12)];
+    expect(run({ listings: l, settings: { maxDays: 30 } }).verdict).toBe("MAYBE");
+    expect(run({ listings: l, settings: { maxDays: 60 } }).verdict).toBe("BUY");
+  });
+
+  it("BR-5: fewer than 3 matched comps is NOT_ENOUGH_DATA regardless of speed", () => {
     const r = run({ listings: [listings("ebay", [40, 45])] });
     expect(r.verdict).toBe("NOT_ENOUGH_DATA");
     expect(r.recommendedPlatform).toBeNull();
+  });
+
+  it("BR-5: unknown speed on a profitable item is MAYBE end to end", () => {
+    const r = run({ listings: [listings("ebay", [40, 42, 45, 45, 48, 50, 52], 20, 20, false)] });
+    expect(r.verdict).toBe("MAYBE");
+    expect(r.spoken).toContain("Speed unknown");
   });
 });
 
@@ -129,11 +148,37 @@ describe("BR-8 home-platform preference", () => {
 });
 
 describe("BR-10 sell speed", () => {
-  it("estimates days from sell-through and clamps", () => {
-    expect(estimateDaysToSell(30, 30)).toBe(30);
-    expect(estimateDaysToSell(60, 20)).toBe(10);
-    expect(estimateDaysToSell(0, 50)).toBe(180);
-    expect(estimateDaysToSell(1000, 1)).toBe(1);
+  const L = (sold: number, active: number, complete = true) => listings("ebay", [], sold, active, complete);
+
+  it("uses sold/active against the 30 / max_days threshold", () => {
+    expect(sellSpeed(L(12, 12), settings()).signal).toBe("meets_target");
+    expect(sellSpeed(L(6, 12), settings()).signal).toBe("below_target");
+    expect(sellSpeed(L(6, 12), settings({ maxDays: 60 })).signal).toBe("meets_target");
+    expect(sellSpeed(L(6, 12), settings()).sellThrough).toBe(0.5);
+  });
+
+  it("does not cap a rate above 100%", () => {
+    expect(sellSpeed(L(30, 10), settings()).sellThrough).toBe(3);
+  });
+
+  it("is unknown with fewer than 3 sales, zero active, or incomplete coverage", () => {
+    for (const l of [L(2, 10), L(10, 0), L(10, 10, false)]) {
+      const s = sellSpeed(l, settings());
+      expect(s.signal).toBe("unknown");
+      expect(s.sellThrough).toBeNull();
+    }
+    expect(sellSpeed({ ...L(10, 10), coverageComplete: undefined }, settings()).signal).toBe("unknown");
+  });
+
+  it("3 sales is enough", () => {
+    expect(sellSpeed(L(3, 3), settings()).signal).toBe("meets_target");
+  });
+
+  it("BR-7: no tag price with unknown speed is MAYBE with a max price", () => {
+    const r = run({ item: { tagPrice: null }, listings: [listings("ebay", [40, 42, 45, 45, 48], 1, 5)] });
+    expect(r.verdict).toBe("MAYBE");
+    expect(r.maxBuyPrice).not.toBeNull();
+    expect(r.spoken).toContain("Speed unknown");
   });
 });
 
@@ -188,7 +233,17 @@ describe("BR-13 / BR-14 / BR-15 output", () => {
     expect(r.spoken.split(/\s+/).length).toBeLessThanOrEqual(20);
     const rec = r.platforms.find((p) => p.platform === r.recommendedPlatform)!;
     expect(r.spoken).toContain(`$${Math.round(rec.netProfit)}`);
-    expect(r.spoken).toContain(`${rec.estDaysToSell} days`);
+    expect(r.spoken).toContain(SPEED_SIGNAL_TEXT[rec.speed.signal]);
+  });
+
+  it("BR-14: speech and result never state a per-item days prediction", () => {
+    for (const l of [listings("ebay", [40, 42, 45, 45, 48, 50, 52], 6, 12), listings("ebay", [40, 42, 45, 45, 48, 50, 52], 1, 0)]) {
+      const r = run({ listings: [l] });
+      expect(r.spoken).not.toMatch(/\bdays?\b/i);
+      expect(r.reason).not.toMatch(/\bdays?\b/i);
+      expect(JSON.stringify(r)).not.toMatch(/estDaysToSell/);
+      expect(r.spoken.split(/\s+/).length).toBeLessThanOrEqual(20);
+    }
   });
 
   it("BR-14: losing items say how much you'd lose", () => {

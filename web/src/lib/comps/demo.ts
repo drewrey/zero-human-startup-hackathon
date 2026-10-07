@@ -77,6 +77,6 @@ export async function fetchDemoListings(item: ItemAttributes, now: Date): Promis
 
     const soldLast30d = Math.max(1, Math.round(count * (0.5 + rand() * 0.5)));
     const activeListings = Math.round(soldLast30d * (0.3 + rand() * 1.7));
-    return { platform, sold, soldLast30d, activeListings };
+    return { platform, sold, soldLast30d, activeListings, coverageComplete: true };
   });
 }

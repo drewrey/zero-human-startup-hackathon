@@ -71,5 +71,13 @@ export const MAX_FOLLOW_UPS = 2;
 /** BR-1: comp lookback window. */
 export const COMP_WINDOW_DAYS = 90;
 
-/** BR-10 clamp bounds. */
-export const DAYS_TO_SELL_BOUNDS = { min: 1, max: 180 };
+/** BR-10: sold-listing lookback and the minimum sales needed for a trustworthy rate. */
+export const SPEED_LOOKBACK_DAYS = 30;
+export const MIN_SPEED_SALES = 3;
+
+/** BR-10 / BR-14: plain-language signal text shared by the card and speech. */
+export const SPEED_SIGNAL_TEXT = {
+  meets_target: "Recent demand meets your pace",
+  below_target: "Slower than your target",
+  unknown: "Speed unknown",
+} as const;

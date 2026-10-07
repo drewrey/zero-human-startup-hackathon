@@ -1,10 +1,12 @@
 import {
   COMP_WINDOW_DAYS,
-  DAYS_TO_SELL_BOUNDS,
   FEES,
   HOME_PLATFORM_BIAS,
   LOW_CONFIDENCE_MAX_COMPS,
   MIN_COMPS,
+  MIN_SPEED_SALES,
+  SPEED_LOOKBACK_DAYS,
+  SPEED_SIGNAL_TEXT,
   platformFee,
 } from "../config";
 import {
@@ -16,11 +18,13 @@ import {
   type PlatformListings,
   type PlatformResult,
   type PriceCheckResult,
+  type SellSpeed,
   type Settings,
+  type SpeedSignal,
   type UnderstoodBy,
   type Verdict,
 } from "../types";
-import { clamp, iqrBounds, median, quantile } from "./stats";
+import { iqrBounds, median, quantile } from "./stats";
 
 const LOT_PATTERN = /\b(lot|bundle|bulk|set of \d+|\d+\s*(pc|pcs|piece|pieces))\b/i;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -100,11 +104,30 @@ export function selectComps(
   return { comps, excluded };
 }
 
-/** BR-10 (v0 heuristic). */
-export function estimateDaysToSell(soldLast30d: number, activeListings: number): number {
-  if (soldLast30d <= 0) return DAYS_TO_SELL_BOUNDS.max;
-  const sellThrough = soldLast30d / Math.max(activeListings, 1);
-  return Math.round(clamp(30 / sellThrough, DAYS_TO_SELL_BOUNDS.min, DAYS_TO_SELL_BOUNDS.max));
+/**
+ * BR-10: market-level sold/active signal. Unknown (never a guess) when coverage is incomplete,
+ * fewer than MIN_SPEED_SALES sold, or no active listings. Not a per-listing days prediction.
+ */
+export function sellSpeed(listings: PlatformListings, settings: Settings): SellSpeed {
+  const threshold = settings.maxDays > 0 ? SPEED_LOOKBACK_DAYS / settings.maxDays : Infinity;
+  const sold = listings.soldLast30d;
+  const active = listings.activeListings;
+  const trusted =
+    listings.coverageComplete === true &&
+    Number.isFinite(sold) && Number.isFinite(active) &&
+    sold >= MIN_SPEED_SALES && active > 0;
+  if (!trusted) {
+    return { lookbackDays: SPEED_LOOKBACK_DAYS, soldLast30d: null, activeListings: null, sellThrough: null, threshold, signal: "unknown" };
+  }
+  const sellThrough = sold / active;
+  return {
+    lookbackDays: SPEED_LOOKBACK_DAYS,
+    soldLast30d: sold,
+    activeListings: active,
+    sellThrough,
+    threshold,
+    signal: sellThrough >= threshold ? "meets_target" : "below_target",
+  };
 }
 
 export function purchaseCost(tagPrice: number | null, settings: Settings): number {
@@ -137,7 +160,7 @@ export function evaluatePlatform(
     fees: round2(fees),
     shipping: round2(shipping),
     netProfit: round2(netProfit),
-    estDaysToSell: estimateDaysToSell(listings.soldLast30d, listings.activeListings),
+    speed: sellSpeed(listings, settings),
     comps,
     excluded,
   };
@@ -157,14 +180,13 @@ export function recommendPlatform(results: PlatformResult[], settings: Settings)
   return best.netProfit - home.netProfit >= margin ? best : home;
 }
 
-/** BR-5 and BR-4 with a known tag price. */
-export function decideVerdict(netProfit: number, estDaysToSell: number, settings: Settings): Verdict {
+/** BR-5 and BR-4 with a known tag price. Unknown speed never yields BUY or PASS by itself. */
+export function decideVerdict(netProfit: number, signal: SpeedSignal, settings: Settings): Verdict {
   if (netProfit <= 0) return "PASS";
   const profitOk = netProfit >= settings.minProfit;
-  const speedOk = estDaysToSell <= settings.maxDays;
-  if (profitOk && speedOk) return "BUY";
-  if (profitOk || speedOk) return "MAYBE";
-  return "PASS";
+  if (profitOk && signal === "meets_target") return "BUY";
+  if (!profitOk && signal === "below_target") return "PASS";
+  return "MAYBE";
 }
 
 /**
@@ -220,8 +242,8 @@ export function priceCheck(input: PriceCheckInput): PriceCheckResult {
   const confidence = rec.compsUsed <= LOW_CONFIDENCE_MAX_COMPS ? "low" : "normal";
   const label = PLATFORM_LABELS[rec.platform];
   const net = Math.round(rec.netProfit);
-  const days = rec.estDaysToSell;
-  const speedOk = days <= settings.maxDays;
+  const signal = rec.speed.signal;
+  const speedText = SPEED_SIGNAL_TEXT[signal];
 
   if (item.tagPrice == null) {
     const max = maxBuyPrice(rec.netProfit, settings);
@@ -230,33 +252,24 @@ export function priceCheck(input: PriceCheckInput): PriceCheckResult {
     if (max == null) {
       verdict = "PASS";
       reason = `Even free, only about $${net} profit on ${label}.`;
-    } else if (speedOk) {
-      verdict = "BUY_UNDER";
-      reason = `Worth it under $${max}. Best on ${label}, sells in about ${days} days.`;
     } else {
-      verdict = "MAYBE";
-      reason = `Slow seller, about ${days} days. Worth it under $${max}.`;
+      verdict = signal === "meets_target" ? "BUY_UNDER" : "MAYBE";
+      reason =
+        signal === "below_target"
+          ? `Slower market. Worth it under $${max} on ${label}.`
+          : `Worth it under $${max} on ${label}. ${speedText}.`;
     }
     return finish({ ...base, recommendedPlatform: rec.platform, verdict, confidence, maxBuyPrice: max, reason });
   }
 
-  const verdict = decideVerdict(rec.netProfit, days, settings);
-  const profitOk = rec.netProfit >= settings.minProfit;
+  const verdict = decideVerdict(rec.netProfit, signal, settings);
   let reason: string;
-  switch (verdict) {
-    case "BUY":
-      reason = `Best on ${label}, about $${net} profit, sells in about ${days} days.`;
-      break;
-    case "MAYBE":
-      reason = profitOk
-        ? `About $${net} profit on ${label}, but slow: about ${days} days.`
-        : `Only about $${net} profit on ${label}, sells in about ${days} days.`;
-      break;
-    default:
-      reason =
-        rec.netProfit <= 0
-          ? `You'd lose about $${Math.abs(net)} on ${label}.`
-          : `Only about $${net} profit and slow, about ${days} days.`;
+  if (rec.netProfit <= 0) {
+    reason = `You'd lose about $${Math.abs(net)} on ${label}.`;
+  } else if (verdict === "BUY") {
+    reason = `Best on ${label}, about $${net} profit. ${speedText}.`;
+  } else {
+    reason = `About $${net} profit on ${label}. ${speedText}.`;
   }
   return finish({ ...base, recommendedPlatform: rec.platform, verdict, confidence, maxBuyPrice: null, reason });
 }

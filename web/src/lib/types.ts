@@ -55,6 +55,27 @@ export interface PlatformListings {
   soldLast30d: number;
   /** Number of currently active listings for the same query (BR-10). */
   activeListings: number;
+  /**
+   * BR-10: true only when both the 30-day sold and the active searches are complete and
+   * trustworthy (same filters, not capped). Absent or false means the speed is unknown.
+   */
+  coverageComplete?: boolean;
+}
+
+export type SpeedSignal = "meets_target" | "below_target" | "unknown";
+
+/** BR-10: market-level sold/active signal. Not a per-listing days-to-sell prediction. */
+export interface SellSpeed {
+  lookbackDays: number;
+  /** Numerator; null when coverage is not trustworthy. */
+  soldLast30d: number | null;
+  /** Denominator; null when coverage is not trustworthy. */
+  activeListings: number | null;
+  /** soldLast30d / activeListings, unrounded, may exceed 1; null when the signal is unknown. */
+  sellThrough: number | null;
+  /** 30 / max_days, the rate needed to meet the user's target window. */
+  threshold: number;
+  signal: SpeedSignal;
 }
 
 export interface PlatformResult {
@@ -67,7 +88,7 @@ export interface PlatformResult {
   shipping: number;
   /** Net profit after fees, shipping, and purchase cost (BR-2). Excludes purchase cost when tag price is unknown. */
   netProfit: number;
-  estDaysToSell: number;
+  speed: SellSpeed;
   comps: Comp[];
   excluded: ExcludedComp[];
 }

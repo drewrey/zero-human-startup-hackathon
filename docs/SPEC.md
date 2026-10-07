@@ -22,11 +22,11 @@ Voice-first. Photo is optional (and later powers listing drafts).
 🎤  "Patagonia Synchilla, nine bucks"
 🔊  "Snap-T or quarter-zip? And what size?"          ← ≤ 2 follow-ups, only price-relevant
 🎤  "Snap-T, large"
-🔊  "Buy it. Best on eBay, about 32 profit, sells in about a week."
+🔊  "Buy it. Best on eBay, about 32 profit. Recent demand meets your pace."
 📱  ┌──────────────────────────────┐
     │ ✅ BUY        +$32 on eBay ⭐ │
     │ Sold $38–$52 · median $45    │
-    │ 24 comps · ~9 days to sell   │
+    │ 24 comps · 150% sold/active  │
     │ eBay $32 · Posh $29 · Depop $28
     │ [why? → comps]  [+ haul]     │
     └──────────────────────────────┘
@@ -50,10 +50,10 @@ Voice-first. Photo is optional (and later powers listing drafts).
 | Screen | Contents |
 |---|---|
 | Capture | Big mic button, live transcript, optional camera button, settings gear |
-| Result card | Verdict (BUY / MAYBE / PASS / NOT ENOUGH DATA), best platform + net profit, sold range + median, comp count, est. days to sell, per-platform net row, assumptions made, buttons: why?, + haul, new item |
+| Result card | Verdict (BUY / MAYBE / PASS / NOT ENOUGH DATA), best platform + net profit, sold range + median, comp count, 30-day sold/active rate and speed signal (or speed unknown), per-platform net row, assumptions made, buttons: why?, + haul, new item |
 | Comps | Sold listings used: platform, title, sold price, sold date, link; excluded listings hidden behind a toggle |
 | Haul | Today's items: name, tag price, expected net, best platform; trip totals (spent, expected revenue, expected profit) |
-| Settings | Home platform, min profit per item, max days to sell, sales tax rate |
+| Settings | Home platform, min profit per item, desired sale window (`max_days`), sales tax rate |
 
 ## 3. Business rules
 
@@ -72,20 +72,24 @@ Voice-first. Photo is optional (and later powers listing drafts).
 
 - **BR-4 Hard rule:** a verdict is never BUY when net profit on the recommended platform is ≤ $0.
 - **BR-5 Verdict logic** (using the recommended platform, BR-8):
-  - **BUY:** `net_profit ≥ min_profit` AND `est_days_to_sell ≤ max_days`
-  - **MAYBE:** `net_profit > 0` and exactly one of the two thresholds fails
-  - **PASS:** `net_profit ≤ 0`, or both thresholds fail
-  - **NOT ENOUGH DATA:** fewer than 3 matched sold comps across all platforms
+  - **NOT ENOUGH DATA:** fewer than 3 matched sold comps across all platforms; check this first.
+  - **PASS:** `net_profit ≤ 0`; or net profit is positive but below `min_profit` AND known
+    sell-through fails the speed threshold in BR-10.
+  - **BUY:** `net_profit ≥ min_profit` AND a known sell-through rate meets the BR-10 speed threshold.
+  - **MAYBE:** remaining positive-profit cases (one threshold fails, or speed is unknown).
+    Unknown speed cannot produce BUY or PASS solely for being unknown.
   - `min_profit` and `max_days` are per-user settings. Defaults: `min_profit = $10`,
-    `max_days = 30` (to be checked with users).
+    `max_days = 30` (to be checked with users). `max_days` is a desired sale window for a
+    market-level demand threshold, **not** a per-listing time-to-sale prediction.
 - **BR-6 Follow-up questions:** at most 2 per item. Only ask about attributes that change price
   (model/variant, size, gender, condition, era). Otherwise proceed and state assumptions on the card
   ("Assumed: men's, good condition").
 - **BR-7 Missing tag price:** if the sourcer gives no tag price, output a **max buy price** instead of
   BUY/PASS: the highest whole-dollar tag price at which net profit still clears `min_profit` (and stays
-  > $0). Spoken as "Worth it under $X." If it sells too slowly (`est_days_to_sell > max_days`), the
-  verdict is MAYBE with the max price ("Slow seller, about N days. Worth it under $X."). If no tag price
-  would clear `min_profit`, the verdict is PASS ("Even free, only about $N profit").
+  > $0). Spoken as "Worth it under $X." If known sell-through misses the BR-10 speed threshold,
+  the verdict is MAYBE with the max price ("Slower market. Worth it under $X."). If speed is
+  unknown, say so and use MAYBE with the max price; never imply an individual sale time. If no
+  tag price would clear `min_profit`, the verdict is PASS ("Even free, only about $N profit").
 - **BR-13 Low confidence:** with 3–5 matched comps, the verdict shows a "low confidence" label and the
   spoken answer says so.
 
@@ -100,10 +104,24 @@ Voice-first. Photo is optional (and later powers listing drafts).
 
 ### Sell speed
 
-- **BR-10 Est. days to sell (v0 heuristic):** per platform,
-  `sell_through = sold_last_30d / max(active_listings, 1)`;
-  `est_days_to_sell = clamp(30 / sell_through, 1, 180)`. Shown as "~N days". Replace with a better model
-  once we have our own outcome data.
+- **BR-10 Sell speed (v0 market signal):** per platform, count comparable sold listings in
+  the trailing 30 days and comparable active listings at lookup time, using the same item
+  attributes/filters (BR-11), marketplace and de-duplication rules. When both searches have
+  complete, trustworthy coverage, `sold_last_30d >= 3` and `active_listings > 0`, set
+  `sell_through = sold_last_30d / active_listings` (the reseller **sold/active** convention;
+  it may exceed 100%). Otherwise `sell_through = null` and `speed_signal = "unknown"`;
+  do not replace a zero active count with one or treat an incomplete/capped result as a count.
+  For a known rate, `speed_threshold = 30 / max_days`. A rate at least the threshold is
+  `"meets_target"`, otherwise `"below_target"`. Speak/show “Recent demand meets your pace”
+  for the first or “Slower than your target” for the second, not a universal “fast” label;
+  show “Speed unknown” when neither count is trustworthy. This is a heuristic market-demand
+  comparison for the user's desired sale window, **not** a probability or a prediction
+  that this specific listing will sell within that many days. Show the lookback, numerator,
+  denominator, rate (rounded for display only) and plain-language signal on the card;
+  speech names the signal, never “sells in N days.” Use the unrounded rate for the verdict.
+  Sold-in-30-days and today's active snapshot are different windows, so seasonality,
+  listing price and matching quality can distort the signal. Recalibrate against our own
+  outcome data later. Method/caveats: [sold/active conventions and data limitations](https://flowlister.com/tools/sell-through-rate-calculator/) (checked 2026-10-07).
 
 ### Comps
 
@@ -115,7 +133,8 @@ Voice-first. Photo is optional (and later powers listing drafts).
 ### Voice
 
 - **BR-14 Spoken answer** is ≤ 20 words, in this order: verdict, best platform, net profit (rounded
-  to the dollar), sell speed. Numbers on the card and in speech must match.
+  to the dollar), sell-speed signal (or “speed unknown”). Numbers and the signal on the card and
+  in speech must match; never state a per-item days-to-sell prediction from BR-10.
 - **BR-15** The card and the spoken answer are produced from the same result object.
 
 ### Data
@@ -162,23 +181,32 @@ If only one platform is live, BR-8 still runs; it simply has one candidate.
   "assumptions": ["condition: good"],
   "platforms": [
     { "platform": "ebay", "comps_used": 24, "median": 45, "p25": 38, "p75": 52,
-      "fees": 6.0, "shipping": 0, "net_profit": 32.0, "est_days_to_sell": 9 }
+      "fees": 6.0, "shipping": 0, "net_profit": 32.0,
+      "speed": { "sold_last_30d": 18, "active_listings": 12, "sell_through": 1.5,
+                 "signal": "meets_target", "as_of": "2026-10-07" } }
   ],
   "recommended_platform": "ebay",
   "verdict": "BUY",
   "confidence": "normal",
   "max_buy_price": null,
-  "spoken": "Buy it. Best on eBay, about 32 profit, sells in about a week."
+  "spoken": "Buy it. Best on eBay, about 32 profit. Recent demand meets your pace."
 }
 ```
 
 ## 6. Acceptance checks (for Prelint / QA)
 
 - A result with negative net profit on the recommended platform is never BUY (BR-4).
-- Changing `min_profit` in settings changes the verdict on the next scan without code changes (BR-5).
+- Changing `min_profit` or `max_days` changes the next verdict without code changes;
+  at `max_days = 30`, 12 sold / 12 active meets the speed threshold, while 6 / 12 does not
+  (assuming complete coverage). At `max_days = 60`, 6 / 12 meets it (BR-5, BR-10).
 - No tag price → card shows "Worth it under $X", no BUY/PASS (BR-7).
 - Never more than 2 follow-up questions per item (BR-6).
-- Fewer than 3 comps → NOT ENOUGH DATA (BR-5).
+- Fewer than 3 matched sold comps across platforms → NOT ENOUGH DATA regardless of speed (BR-5).
+- Fewer than 3 matching sales in the 30-day speed window, zero active listings, or incomplete
+  sold/active coverage → speed unknown. Positive-profit cases become MAYBE, never BUY solely
+  from a missing speed count; negative or zero profit remains PASS (BR-4, BR-5, BR-10).
+- When a trustworthy rate exceeds 100%, show its sold/active percentage without capping it;
+  no card, speech or result object implies a specific number of days to sell (BR-10, BR-14).
 - Spoken numbers equal card numbers (BR-14, BR-15).
 - Home platform is recommended when it is within the bias threshold of the best platform (BR-8).
 - Fee values come from config with a source and as-of date (BR-3).

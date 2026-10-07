@@ -14,7 +14,7 @@ and on-screen verdict in seconds.
 - The API that runs the conversation and calls the Pricing Data pipeline.
 - Voice: speech-to-text and text-to-speech through **Voiskey**, with the browser's built-in speech API
   as a fallback.
-- Backend and deployment on **InsForge (hosted on Instacloud)**: database, storage, environment variables,
+- Backend and deployment on **InstaCloud**: the app container, Postgres, storage, secrets,
   and uptime during the demo.
 - Unit tests for every business rule in SPEC §3 (`BR-n` in the test name).
 
@@ -58,5 +58,5 @@ does it cost to run?
 
 ## Tools
 
-AdaL (build and execute), Tenki (sandbox, runners, PR review), Prelint, Voiskey (if we get access), InsForge on Instacloud,
+AdaL (build and execute), Tenki (sandbox, runners, PR review), Prelint, Voiskey (if we get access), InstaCloud,
 BAND.

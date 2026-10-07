@@ -40,6 +40,16 @@ Copy `.env.example` to `.env.local`.
 | Haul + settings | Stored on the device (localStorage) |
 | Scan storage (BR-16) | Not yet; waiting on backend choice |
 
+## Deploy (InstaCloud)
+
+The app ships as a container (`Dockerfile`, Next.js standalone output, port 8080).
+
+- **GitHub deploy:** in the InstaCloud console, connect this repo with **root directory `web`**. Pushes to
+  `main` redeploy.
+- **From a terminal:** `cd web && npx insta deploy .` (after `npx insta login` and `npx insta project link <id>`).
+- **Secrets:** set `APIFY_TOKEN` (and `ANTHROPIC_API_KEY` if used) as project secrets, never `NEXT_PUBLIC_*`.
+- `npx insta build . --explain` checks locally whether it will build.
+
 ## Layout
 
 ```

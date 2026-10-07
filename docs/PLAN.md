@@ -55,10 +55,10 @@ Phone (PWA, earbuds)
                       5. Economics           per-platform fees + shipping → net profit vs. tag price
                       6. Recommend + verdict home-platform bias → BUY / MAYBE / PASS → spoken text + card
        ◄── text-to-speech (Voiskey) + result card
-                    Store scans + comps (InsForge DB/storage) → becomes the pricing dataset
+                    Store scans + comps (InstaCloud Postgres/storage) → becomes the pricing dataset
                     Phase 2: price index checked first (BR-18); nightly batch jobs refresh and grow it,
                     so live scraping is only needed for the long tail
-Deploy: InsForge on Instacloud (backend + hosting)
+Deploy: InstaCloud (container from GitHub, root dir `web`) + its Postgres/storage
 Built by: AdaL (Engineer agent), reviewed in Tenki, checked against docs/SPEC.md by Prelint
 ```
 
@@ -84,7 +84,7 @@ tier; until then each has a fallback.
 | Tool | Credits | Use | Owner | Phase |
 |---|---|---|---|---|
 | Kylon | $100 | Hosts the 5 agents, roles, task ownership; agent handoffs until BAND is available | CEO | 1 |
-| InsForge on Instacloud | Free tier | Backend (Postgres, auth, storage, functions) + hosting the app. Free tier includes $1 of model-gateway credit; free projects pause after a week idle | Engineer | 1 |
+| InstaCloud (from the InsForge team) | Free tier | Hosts the app as a container (GitHub deploy, root dir `web`), plus Postgres and storage for scans and the price index. Services scale to zero when idle | Engineer | 1 |
 | Apify | $100 | Sold and active listings for comps, and nightly index refreshes | Pricing Data | 1 |
 | Prelint | $250 (this repo) | Check code against `docs/SPEC.md` before each deploy | PM | 1 |
 | Rocket Ride | Cloud code | Price-check pipeline, nightly batch jobs, feedback pipeline | Pricing Data | 1–2 |
@@ -105,8 +105,7 @@ tier; until then each has a fallback.
   Oct 10, the CEO decides what to cut.
 - **Glasser ($10):** roughly a handful of queries. Growth proposes each one; the CEO approves.
 - **Kylon ($100), Tenki ($200), Prelint ($250), Querit ($100):** no cap expected this week; Finance tracks totals.
-- **Model calls:** not covered by any sponsor beyond InsForge's $1. See the open decision in
-  `docs/decisions.md`.
+- **Model calls:** not covered by any sponsor. See the open decision in `docs/decisions.md`.
 
 ## 7. Phase 1 timeline (today)
 

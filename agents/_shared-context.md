@@ -30,7 +30,7 @@ If something you need isn't in these files, ask the owner. Don't invent it.
 
 ## Tools you actually have
 
-Credits and fallbacks are tracked in `docs/PLAN.md` §6. In short: Kylon, InsForge on Instacloud,
+Credits and fallbacks are tracked in `docs/PLAN.md` §6. In short: Kylon, InstaCloud,
 Apify, Querit, Prelint, Rocket Ride, Tenki, AdaL, and Glasser (only $10, ask the CEO before each use) are
 available. Voiskey, BAND, Paritok, and Finch are **not confirmed**. If your role mentions
 one of them, use the fallback listed in the plan and say so in your work log. Never spend credits

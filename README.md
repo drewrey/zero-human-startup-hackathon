@@ -15,6 +15,7 @@ sold comps across marketplaces, expected profit after fees, and a BUY / PASS cal
 | `docs/SPEC.md` | Product spec + business rules (the source of truth Prelint checks against) |
 | `agents/` | The AI founding team: roster, handoffs, and per-agent role prompts |
 | `web/` | The MVP: mobile-first Next.js app (see `web/README.md`) |
+| `ops/band/` | BAND setup, Kylon ↔ BAND relay, and CLI for local agents |
 
 ## How changes land
 

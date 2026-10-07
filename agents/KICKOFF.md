@@ -13,7 +13,8 @@ Done: workspace **Circling Vultures** (`a3fae6244774`); agents Atlas, Scout, Spe
 (ids in `kylon-agents.json`) with their role prompts installed as skills
 (`scripts/kylon-sync-skills.py`); rooms `#hq`, `#research`, `#product-eng`, `#pricing`; kickoff
 posted in `#hq`. Agents set up their own connections (founder approves the cards) and Atlas builds the
-Agent Log and Decisions database apps. Pending: Forge in AdaL, BAND room, Rocket Ride, Kylon API key.
+Agent Log and Decisions database apps. BAND room "Flipwise Ops" is live with all six agents (`ops/band/`); first handoff Spec → Forge sent
+over BAND. Pending: Forge in AdaL, Rocket Ride, Kylon API key.
 
 ## 0. What the founder does vs. what's scripted
 

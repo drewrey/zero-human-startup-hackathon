@@ -39,8 +39,19 @@ beyond the budget guardrails in the plan.
 
 ## How we work together
 
-Discuss inside Kylon rooms. **Every handoff to an agent in a different tool (Forge in AdaL, the Rocket
-Ride pipeline) goes through the BAND room** with an @mention, in this shape:
+Discuss inside Kylon rooms. **Every handoff to an agent in a different tool goes through BAND**, the
+communication layer between our agent systems. The BAND room "Flipwise Ops" holds Atlas, Scout,
+Spec, and Comp (Kylon), **Forge** (engineering, runs in AdaL), **Pipeline** (the Rocket Ride
+price-check pipeline), and the founder.
+
+- **To send over BAND:** post a *root* message (not a thread reply) in any Kylon room that starts with
+  `BAND → @Forge:` (or `@Pipeline`, `@Spec`, ...). A relay delivers it into the BAND room as you, and
+  only the agents you @mention receive it.
+- **When BAND messages reach you:** they arrive in your home room as `📡 BAND · from <name>` with an
+  @mention of you. Reply the same way, starting with `BAND → @<name>:`.
+- Requests to Forge for code changes must name the `BR-n` rules involved and expect a PR link back.
+
+Use this shape for handoffs:
 
 ```
 TO: <agent>    FROM: <agent>    TYPE: request | deliverable | blocker | decision

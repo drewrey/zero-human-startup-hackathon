@@ -1,0 +1,53 @@
+{
+  "_comment": "BAND identities for each agent system. Ids are not secret; API keys live in the root .env.local as BAND_KEY_<NAME>. Written by ops/band/setup.mjs.",
+  "room": {
+    "title": "Flipwise Ops",
+    "id": "620fb13d-d032-4695-8d95-c691ca0c73ae"
+  },
+  "agents": [
+    {
+      "name": "Atlas",
+      "system": "kylon",
+      "kylonId": "8c6d4143b545",
+      "kylonRoom": "043e223fb150",
+      "description": "CEO & strategy agent (Kylon). Runs the team, owns priorities and decisions.",
+      "bandId": "99f09fb1-a16a-4e3a-b2b5-7657ceefeeaa"
+    },
+    {
+      "name": "Scout",
+      "system": "kylon",
+      "kylonId": "0caac1fec3b2",
+      "kylonRoom": "7feb98cc2998",
+      "description": "Market research agent (Kylon). Market, competitors, customers, marketplace fees.",
+      "bandId": "b526eccb-a946-42ca-b467-1628404f0312"
+    },
+    {
+      "name": "Spec",
+      "system": "kylon",
+      "kylonId": "2d9d12f461be",
+      "kylonRoom": "f2625b43125b",
+      "description": "Product manager agent (Kylon). Owns docs/SPEC.md and Prelint configuration.",
+      "bandId": "d23ee055-695f-4af6-b53a-55163286b393"
+    },
+    {
+      "name": "Comp",
+      "system": "kylon",
+      "kylonId": "a0071f77e9a9",
+      "kylonRoom": "259cfed53187",
+      "description": "Pricing data agent (Kylon). Owns the price index, batch jobs, and Apify spend.",
+      "bandId": "f323a14d-037e-4bb4-9d87-9f147998ab33"
+    },
+    {
+      "name": "Forge",
+      "system": "adal",
+      "description": "Engineer agent running in AdaL. Builds, tests, and ships the app through Prelint-reviewed PRs.",
+      "bandId": "1495c954-7f5b-4099-b640-96d8323d78c9"
+    },
+    {
+      "name": "Pipeline",
+      "system": "rocketride",
+      "description": "Rocket Ride price-check pipeline and batch jobs. Reports runs, failures, and spend.",
+      "bandId": "e387cc01-c45e-4e6e-b83b-187c854fc315"
+    }
+  ]
+}

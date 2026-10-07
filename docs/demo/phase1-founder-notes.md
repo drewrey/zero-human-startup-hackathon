@@ -9,11 +9,10 @@ Oct 7, after PR #20 (profit-based BUY/PASS) deployed.
 | | Say (or type) | Live result |
 |---|---|---|
 | BUY | "Patagonia Synchilla, men's large, nine bucks" | **BUY**: "Buy it. Best on eBay, about $57 profit (estimate)." |
-| PASS | "Patagonia Synchilla, men's large, $90" (or "90 dollars") | **PASS**: "Pass. You'd lose about $24 on eBay." |
+| PASS | "Old Navy fleece, men's large, twenty bucks" | **PASS**: "Pass. You'd lose about $8 on eBay." (26 comps, median $15.60) |
 
-Same item, different tag price, different answer: that's the point. Spoken "ninety bucks" isn't
-parsed yet (number words stop at fifty; Forge has the fix). If dictation writes it as words,
-type "$90" instead. Both items are cached, so answers are instant once the site is awake. Open the
+A known brand that resells well versus a cheap brand that loses money even at a thrift price.
+Both items are cached, so answers are instant once the site is awake (verified 4:27 PM PT). Open the
 site and run one item about 5 minutes before presenting.
 
 ## Tools at each step

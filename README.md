@@ -1,5 +1,10 @@
 # Zero Human Startup Hackathon — Secondhand Economy
 
+> **Status: no longer maintained (Oct 2026).** This was a hackathon experiment in running a startup
+> with a team of AI agents. Development has stopped, and the agent workspaces, hosted app, database,
+> and API keys it relied on have been shut down, so the setup steps below no longer work. The code and
+> docs are left here as a record.
+
 An AI-native startup, run by a team of AI agents, building tools for secondhand resellers.
 
 **Wedge:** an in-store sourcing copilot. A reseller snaps a photo (or speaks) while thrifting and gets
